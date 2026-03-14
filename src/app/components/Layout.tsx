@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLenisScroll } from '@/hooks/useLenisScroll';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
@@ -13,6 +13,7 @@ export function Layout() {
   useLenisScroll();
   const releaseRef = useRef<string | null>(null);
   const releaseInitRef = useRef(false);
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -50,7 +51,13 @@ export function Layout() {
           }
           if (releaseRef.current && nextValue !== releaseRef.current) {
             releaseRef.current = nextValue;
-            window.location.reload();
+            setShowUpdateBanner(true);
+            if (navigator.serviceWorker?.controller) {
+              navigator.serviceWorker.controller.postMessage({ type: 'FORCE_RELOAD' });
+            }
+            window.setTimeout(() => {
+              window.location.reload();
+            }, 2000);
           } else if (!releaseRef.current) {
             releaseRef.current = nextValue;
           }
@@ -70,6 +77,11 @@ export function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {showUpdateBanner && (
+        <div className="bg-blue-600 text-white text-sm px-4 py-2 text-center">
+          New update available. Refreshing your session...
+        </div>
+      )}
       {!hideChrome && <Navbar />}
       <main className={`flex-1 ${hideChrome ? '' : 'pb-24'}`}>
         <Outlet />

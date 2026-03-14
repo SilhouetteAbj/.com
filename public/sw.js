@@ -55,3 +55,13 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'FORCE_RELOAD') {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      clients.forEach((client) => {
+        client.navigate(client.url);
+      });
+    });
+  }
+});

@@ -198,6 +198,7 @@ export function Admin() {
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [dataError, setDataError] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const [publishToast, setPublishToast] = useState(false);
   const notificationCountsRef = useRef({
     appointments: 0,
     referrals: 0,
@@ -784,6 +785,9 @@ export function Admin() {
       .upsert({ key: 'release_version', value: now, updated_at: now }, { onConflict: 'key' });
     if (error) {
       setDataError(`Publish failed: ${error.message}`);
+    } else {
+      setPublishToast(true);
+      window.setTimeout(() => setPublishToast(false), 3000);
     }
     setPublishing(false);
   };
@@ -854,6 +858,11 @@ export function Admin() {
 
   return (
     <div className="min-h-[100dvh] bg-gray-50 flex flex-col lg:flex-row overflow-x-hidden overscroll-y-contain">
+      {publishToast && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
+          Update published. Users will refresh automatically.
+        </div>
+      )}
       {/* Mobile Backdrop Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -953,7 +962,7 @@ export function Admin() {
             <button
               onClick={handlePublish}
               disabled={publishing}
-              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-60"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-60"
             >
               <UploadCloud className="w-4 h-4" />
               {publishing ? 'Publishing...' : 'Publish Update'}
