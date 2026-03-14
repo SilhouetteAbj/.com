@@ -1,0 +1,48 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+@import './patterns.css';
+
+/* Living Ecosystem Animations */
+@media (prefers-reduced-motion: no-preference) {
+	@keyframes breathe {
+		0% { transform: scale(1); }
+		30% { transform: scale(1.02); }
+		60% { transform: scale(0.98); }
+		100% { transform: scale(1); }
+	}
+	@keyframes pulse-vital {
+		0%, 100% { transform: scale(1); }
+		50% { transform: scale(1.06); }
+	}
+	@keyframes heartbeat {
+		0% { transform: scale(1); }
+		10% { transform: scale(1.12); }
+		20% { transform: scale(0.96); }
+		30% { transform: scale(1.08); }
+		40% { transform: scale(1); }
+		100% { transform: scale(1); }
+	}
+
+	/* Global breathe for buttons, icons, cards */
+	.breathe {
+		animation: breathe 5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+	.breathe-delay-1 { animation-delay: 0.5s; }
+	.breathe-delay-2 { animation-delay: 1.2s; }
+	.breathe-delay-3 { animation-delay: 2s; }
+	.breathe-delay-4 { animation-delay: 2.7s; }
+	.breathe-delay-5 { animation-delay: 3.4s; }
+
+	/* Vital pulse for dashboard sidebar icons and status badges */
+	.pulse-vital {
+		animation: pulse-vital 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+	.pulse-vital-delay-1 { animation-delay: 0.3s; }
+	.pulse-vital-delay-2 { animation-delay: 1.1s; }
+
+	/* Heartbeat for CTA hover */
+	.heartbeat {
+		animation: heartbeat 0.7s cubic-bezier(0.4, 0, 0.6, 1) 1;
+	}
+}

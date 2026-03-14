@@ -1,0 +1,30 @@
+/* Grid overlay pattern */
+.grid-overlay {
+  background-image: linear-gradient(
+    rgba(99, 179, 237, 0.3) 1px,
+    transparent 1px
+  ),
+  linear-gradient(
+    90deg,
+    rgba(99, 179, 237, 0.3) 1px,
+    transparent 1px
+  );
+  background-size: 50px 50px;
+}
+
+/* Dot pattern overlay */
+.dot-overlay-lg {
+  background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+/* Small dot pattern overlay */
+.dot-overlay-sm {
+  background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Dynamic color utility using CSS variables */
+.color-indicator {
+  background-color: var(--indicator-color, currentColor);
+}

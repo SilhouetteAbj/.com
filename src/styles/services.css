@@ -1,0 +1,209 @@
+.services-page {
+  background: #f7f9ff;
+}
+
+.services-hero {
+  background: linear-gradient(135deg, #001a6e 0%, #0052ff 55%, #00c6ff 100%);
+}
+
+.services-hero-grid {
+  background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0);
+  background-size: 28px 28px;
+}
+
+.services-orb-blue {
+  background: radial-gradient(circle, #00c6ff, transparent);
+}
+
+.services-orb-purple {
+  background: radial-gradient(circle, #7c3aed, transparent);
+}
+
+.services-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.services-title-highlight {
+  background-image: linear-gradient(90deg, #60efff, #0061ff);
+}
+
+.services-search-input {
+  font-size: 0.95rem;
+}
+
+.services-search-results {
+  max-width: 100%;
+}
+
+.services-section-title {
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.services-empty-title {
+  font-weight: 600;
+}
+
+.services-info-title {
+  font-weight: 700;
+}
+
+.services-cta {
+  background: linear-gradient(135deg, #0052ff08, #00c6ff12);
+}
+
+.services-banner {
+  background: linear-gradient(135deg, #001a6e 0%, #0052ff 100%);
+}
+
+.services-banner-title {
+  font-weight: 800;
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+}
+
+.services-category-title {
+  font-weight: 800;
+  font-size: 1.4rem;
+}
+
+.stat-icon-blue { color: #60efff; }
+.stat-icon-purple { color: #a78bfa; }
+.stat-icon-green { color: #34d399; }
+.stat-icon-amber { color: #fbbf24; }
+.stat-icon-rose { color: #fb7185; }
+
+.cat-accent-laboratory {
+  --accent: #0052ff;
+  --accent-soft: rgba(0, 82, 255, 0.15);
+  --accent-20: rgba(0, 82, 255, 0.2);
+  --accent-08: rgba(0, 82, 255, 0.08);
+  --accent-shadow: rgba(0, 82, 255, 0.25);
+  --gradient: linear-gradient(90deg, #0052ff, #00c6ff);
+}
+
+.cat-accent-ultrasound {
+  --accent: #06b6d4;
+  --accent-soft: rgba(6, 182, 212, 0.15);
+  --accent-20: rgba(6, 182, 212, 0.2);
+  --accent-08: rgba(6, 182, 212, 0.08);
+  --accent-shadow: rgba(6, 182, 212, 0.25);
+  --gradient: linear-gradient(90deg, #06b6d4, #22d3ee);
+}
+
+.cat-accent-xray {
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.15);
+  --accent-20: rgba(37, 99, 235, 0.2);
+  --accent-08: rgba(37, 99, 235, 0.08);
+  --accent-shadow: rgba(37, 99, 235, 0.25);
+  --gradient: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+.cat-accent-mri {
+  --accent: #8b5cf6;
+  --accent-soft: rgba(139, 92, 246, 0.15);
+  --accent-20: rgba(139, 92, 246, 0.2);
+  --accent-08: rgba(139, 92, 246, 0.08);
+  --accent-shadow: rgba(139, 92, 246, 0.25);
+  --gradient: linear-gradient(90deg, #8b5cf6, #c084fc);
+}
+
+.cat-accent-ct-scan {
+  --accent: #f97316;
+  --accent-soft: rgba(249, 115, 22, 0.15);
+  --accent-20: rgba(249, 115, 22, 0.2);
+  --accent-08: rgba(249, 115, 22, 0.08);
+  --accent-shadow: rgba(249, 115, 22, 0.25);
+  --gradient: linear-gradient(90deg, #f97316, #fb923c);
+}
+
+.cat-accent-endoscopy {
+  --accent: #10b981;
+  --accent-soft: rgba(16, 185, 129, 0.15);
+  --accent-20: rgba(16, 185, 129, 0.2);
+  --accent-08: rgba(16, 185, 129, 0.08);
+  --accent-shadow: rgba(16, 185, 129, 0.25);
+  --gradient: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.cat-accent-cardiology {
+  --accent: #ef4444;
+  --accent-soft: rgba(239, 68, 68, 0.15);
+  --accent-20: rgba(239, 68, 68, 0.2);
+  --accent-08: rgba(239, 68, 68, 0.08);
+  --accent-shadow: rgba(239, 68, 68, 0.25);
+  --gradient: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.cat-accent-dna-testing {
+  --accent: #8b5cf6;
+  --accent-soft: rgba(139, 92, 246, 0.15);
+  --accent-20: rgba(139, 92, 246, 0.2);
+  --accent-08: rgba(139, 92, 246, 0.08);
+  --accent-shadow: rgba(139, 92, 246, 0.25);
+  --gradient: linear-gradient(90deg, #8b5cf6, #c084fc);
+}
+
+.cat-accent-cancer-screening {
+  --accent: #ec4899;
+  --accent-soft: rgba(236, 72, 153, 0.15);
+  --accent-20: rgba(236, 72, 153, 0.2);
+  --accent-08: rgba(236, 72, 153, 0.08);
+  --accent-shadow: rgba(236, 72, 153, 0.25);
+  --gradient: linear-gradient(90deg, #ec4899, #f472b6);
+}
+
+.cat-accent-neurology {
+  --accent: #0ea5e9;
+  --accent-soft: rgba(14, 165, 233, 0.15);
+  --accent-20: rgba(14, 165, 233, 0.2);
+  --accent-08: rgba(14, 165, 233, 0.08);
+  --accent-shadow: rgba(14, 165, 233, 0.25);
+  --gradient: linear-gradient(90deg, #0ea5e9, #38bdf8);
+}
+
+.service-card-bar {
+  background: var(--gradient);
+}
+
+.service-card-badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.service-card-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.service-card-link {
+  color: var(--accent);
+}
+
+.service-card-icon {
+  color: var(--accent);
+}
+
+.service-card-icon-bg {
+  background: var(--accent-20);
+}
+
+.service-card-emoji {
+  background: var(--gradient);
+  box-shadow: 0 8px 24px var(--accent-shadow);
+}
+
+.service-card-short {
+  color: var(--accent);
+}
+
+.service-card-glow {
+  background: radial-gradient(circle at top left, var(--accent-08), transparent 70%);
+}
+
+.hit-badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
