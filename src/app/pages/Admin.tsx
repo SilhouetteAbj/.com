@@ -253,6 +253,17 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
+    const prevBodyOverflow = document.body.style.overflow;
+    const prevHtmlOverflow = document.documentElement.style.overflowY;
+    document.body.style.overflow = 'auto';
+    document.documentElement.style.overflowY = 'auto';
+    return () => {
+      document.body.style.overflow = prevBodyOverflow;
+      document.documentElement.style.overflowY = prevHtmlOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     if (window.innerWidth < 1024) {
       setSidebarOpen(false);
     }
@@ -857,7 +868,7 @@ export function Admin() {
   const currentSection = navItems.find((n) => n.id === section);
 
   return (
-    <div className="min-h-[100dvh] bg-gray-50 flex flex-col lg:flex-row overflow-x-hidden overscroll-y-contain">
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
       {publishToast && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
           Update published. Users will refresh automatically.
@@ -940,7 +951,7 @@ export function Admin() {
       </AnimatePresence>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col w-full min-h-screen">
+      <div className="flex-1 flex flex-col w-full">
         {/* Top bar */}
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
@@ -1072,7 +1083,7 @@ export function Admin() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1">
           <AnimatePresence mode="wait">
             {/* OVERVIEW */}
             {section === 'overview' && (
