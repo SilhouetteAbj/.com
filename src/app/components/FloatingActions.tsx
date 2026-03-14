@@ -12,6 +12,8 @@ export function FloatingActions() {
   const [callOpen, setCallOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [canInstall, setCanInstall] = useState(false);
+  const [showIosInstall, setShowIosInstall] = useState(false);
+  const [iosInstallOpen, setIosInstallOpen] = useState(false);
 
   useEffect(() => {
     const handlePrompt = (event: Event) => {
@@ -31,6 +33,14 @@ export function FloatingActions() {
     };
   }, []);
 
+  useEffect(() => {
+    const ua = window.navigator.userAgent.toLowerCase();
+    const isIos = /iphone|ipad|ipod/.test(ua);
+    const isSafari = isIos && !/crios|fxios/.test(ua) && /safari/.test(ua);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+    setShowIosInstall(isSafari && !isStandalone);
+  }, []);
+
   const handleInstall = async () => {
     if (!installPrompt) return;
     await installPrompt.prompt();
@@ -45,6 +55,23 @@ export function FloatingActions() {
 
   return (
     <div className="fixed bottom-24 right-6 flex flex-col gap-3 z-50">
+      {showIosInstall && (
+        <div className="relative">
+          <button
+            onClick={() => setIosInstallOpen((v) => !v)}
+            aria-label="Install on iPhone"
+            title="Install on iPhone"
+            className="w-12 h-12 rounded-full overflow-hidden bg-black text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border border-gray-700"
+          >
+            <Download className="w-5 h-5" />
+          </button>
+          {iosInstallOpen && (
+            <div className="absolute right-14 bottom-0 w-56 bg-white border border-gray-100 shadow-xl rounded-xl p-3 text-xs text-gray-700">
+              Tap the Share button in Safari, then choose <strong>Add to Home Screen</strong>.
+            </div>
+          )}
+        </div>
+      )}
       {canInstall && (
         <button
           onClick={handleInstall}

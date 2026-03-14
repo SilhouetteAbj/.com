@@ -295,7 +295,7 @@ export function Chat() {
   }, [view, activeChatId]);
 
   return (
-    <div className="w-screen h-screen bg-white flex flex-col">
+    <div className="w-screen min-h-[100dvh] bg-white flex flex-col overflow-x-hidden overscroll-y-contain">
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-blue-100 shadow-sm">
         <div className="h-16 px-4 flex items-center gap-4">

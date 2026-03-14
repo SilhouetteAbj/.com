@@ -51,9 +51,9 @@ export function DoctorReferral() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white">
+    <div className="min-h-[100dvh] bg-slate-950 text-white overflow-x-hidden overscroll-y-contain">
       {/* Mobile Immersive Flow */}
-      <div className="lg:hidden relative min-h-screen overflow-hidden">
+      <div className="lg:hidden relative min-h-[100dvh] overflow-hidden">
         <Link
           to="/"
           className="absolute top-6 left-6 z-20 inline-flex items-center gap-2 px-4 py-2 bg-black/70 text-white text-sm font-semibold rounded-full border border-white/20"

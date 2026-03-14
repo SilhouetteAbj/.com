@@ -6,7 +6,7 @@ import {
   LayoutDashboard, MessageCircle, Calendar,
   LogOut, Bell, Search, Trash2, CheckSquare, Square,
   CheckCircle, XCircle,
-  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock,
+  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock, UploadCloud,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -197,6 +197,7 @@ export function Admin() {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [dataError, setDataError] = useState('');
+  const [publishing, setPublishing] = useState(false);
   const notificationCountsRef = useRef({
     appointments: 0,
     referrals: 0,
@@ -613,7 +614,10 @@ export function Admin() {
     date.setDate(date.getDate() - (6 - index));
     const isoDate = date.toISOString().split('T')[0];
     const label = date.toLocaleDateString([], { weekday: 'short' });
-    const count = appointments.filter((appt) => appt.date === isoDate).length;
+    const count = appointments.filter((appt) => {
+      const created = appt.createdAt ? appt.createdAt.split('T')[0] : '';
+      return created ? created === isoDate : appt.date === isoDate;
+    }).length;
     return { label, count };
   });
 
@@ -771,6 +775,19 @@ export function Admin() {
     setAuthed(true);
   };
 
+  const handlePublish = async () => {
+    if (publishing) return;
+    setPublishing(true);
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert({ key: 'release_version', value: now, updated_at: now }, { onConflict: 'key' });
+    if (error) {
+      setDataError(`Publish failed: ${error.message}`);
+    }
+    setPublishing(false);
+  };
+
   const updateAppointmentStatus = (id: string, status: AppointmentRecord['status']) => {
     const updated = appointments.map((appt) => (appt.id === id ? { ...appt, status } : appt));
     setAppointments(updated);
@@ -836,7 +853,7 @@ export function Admin() {
   const currentSection = navItems.find((n) => n.id === section);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+    <div className="min-h-[100dvh] bg-gray-50 flex flex-col lg:flex-row overflow-x-hidden overscroll-y-contain">
       {/* Mobile Backdrop Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -933,6 +950,14 @@ export function Admin() {
                 className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </div>
+            <button
+              onClick={handlePublish}
+              disabled={publishing}
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-60"
+            >
+              <UploadCloud className="w-4 h-4" />
+              {publishing ? 'Publishing...' : 'Publish Update'}
+            </button>
             <div className="relative">
               <button
                 aria-label="Open notifications"
