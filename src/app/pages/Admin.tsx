@@ -1113,7 +1113,7 @@ export function Admin() {
                 </div>
               )}
             </div>
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
+            
           </div>
         </div>
 
@@ -1226,11 +1226,11 @@ export function Admin() {
 
             {/* ── CHAT ── */}
             {section === 'chat' && (
-              <div className="-mx-4 sm:-mx-6 -my-4 sm:-my-6 flex flex-col lg:flex-row gap-4 h-[calc(100vh-120px)] min-h-[600px] overflow-hidden px-4 sm:px-6 py-4 sm:py-6">
+              <div className="-mx-4 sm:-mx-6 -my-4 sm:-my-6 flex flex-col lg:flex-row gap-4 h-[calc(100vh-120px)] min-h-[600px] min-h-0 overflow-hidden px-4 sm:px-6 py-4 sm:py-6">
                 <AnimatePresence mode="wait">
                   {!viewingChat ? (
                     <ChatInbox
-                      className="flex-1"
+                      className="flex-1 min-h-0"
                       chats={chatPreviews}
                       selectedChatId={selectedChatId}
                       onSelectChat={(chatId) => {
@@ -1834,3 +1834,4 @@ export function Admin() {
     </div>
   );
 }
+

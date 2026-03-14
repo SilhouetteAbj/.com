@@ -425,7 +425,7 @@ export function Chat() {
                         {msg.attachment_url && (
                           <div className="mt-3 bg-white/10 rounded-lg p-2 text-xs">
                             {msg.attachment_type?.startsWith('image/') ? (
-                              <img src={msg.attachment_url} alt={msg.attachment_name || 'Attachment'} className="w-32 h-24 object-cover rounded-md mb-2" />
+                              <img src={msg.attachment_url} alt={msg.attachment_name || 'Attachment'} className="w-full max-w-xs sm:max-w-sm h-auto rounded-md mb-2" />
                             ) : (
                               <a
                                 href={msg.attachment_url}
