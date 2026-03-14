@@ -51,6 +51,8 @@ export function Chat() {
   const [ticketId, setTicketId] = useState('');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [ticketCopied, setTicketCopied] = useState(false);
+  const [chatBusy, setChatBusy] = useState(false);
+  const [chatError, setChatError] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [recordError, setRecordError] = useState('');
@@ -94,59 +96,84 @@ export function Chat() {
   };
 
   const startChat = async () => {
-    const newTicket = generateTicketId();
-    await ensureUser();
-    const chat = await createChat(newTicket);
-    setTicketId(newTicket);
-    setActiveChatId(chat.id);
-    trackLiveAction('live_chat');
-    setTicketCopied(false);
-    const systemMessage = await insertChatMessage(chat.id, {
-      sender: 'system',
-      text: 'Connecting you to a Silhouette representative... This conversation is confidential and protected.',
-      attachment_url: null,
-      attachment_name: null,
-      attachment_type: null,
-      audio_url: null,
-    });
-    const agentMessage = await insertChatMessage(chat.id, {
-      sender: 'agent',
-      text: 'Hello, you are speaking with a live medical support agent. How can I assist you today?',
-      attachment_url: null,
-      attachment_name: null,
-      attachment_type: null,
-      audio_url: null,
-    });
-    setMessages([systemMessage, agentMessage]);
-    setView('chat');
+    if (chatBusy) return;
+    setChatBusy(true);
+    setChatError('');
+    try {
+      const newTicket = generateTicketId();
+      await ensureUser();
+      const chat = await createChat(newTicket);
+      setTicketId(newTicket);
+      setActiveChatId(chat.id);
+      trackLiveAction('live_chat');
+      setTicketCopied(false);
+      const systemMessage = await insertChatMessage(chat.id, {
+        sender: 'system',
+        text: 'Connecting you to a Silhouette representative... This conversation is confidential and protected.',
+        attachment_url: null,
+        attachment_name: null,
+        attachment_type: null,
+        audio_url: null,
+      });
+      const agentMessage = await insertChatMessage(chat.id, {
+        sender: 'agent',
+        text: 'Hello, you are speaking with a live medical support agent. How can I assist you today?',
+        attachment_url: null,
+        attachment_name: null,
+        attachment_type: null,
+        audio_url: null,
+      });
+      setMessages([systemMessage, agentMessage]);
+      setView('chat');
+    } catch (error) {
+      console.error(error);
+      const message = error instanceof Error ? error.message : '';
+      if (message.toLowerCase().includes('anonymous sign-ins are disabled')) {
+        setChatError('Chat is unavailable: Anonymous sign-ins are disabled in Supabase Auth settings.');
+      } else {
+        setChatError('Unable to start chat. Please try again.');
+      }
+    } finally {
+      setChatBusy(false);
+    }
   };
 
   const resumeChat = async () => {
     if (!ticketId.trim()) return;
-    const trimmed = ticketId.trim();
-    await ensureUser();
-    const chat = await fetchChatByTicket(trimmed);
-    setActiveChatId(chat.id);
-    setTicketCopied(false);
-    await insertChatMessage(chat.id, {
-      sender: 'system',
-      text: 'Connecting you to a Silhouette representative... This conversation is confidential and protected.',
-      attachment_url: null,
-      attachment_name: null,
-      attachment_type: null,
-      audio_url: null,
-    });
-    await insertChatMessage(chat.id, {
-      sender: 'agent',
-      text: 'Welcome back. A live medical support agent is ready to continue your conversation.',
-      attachment_url: null,
-      attachment_name: null,
-      attachment_type: null,
-      audio_url: null,
-    });
-    const history = await fetchChatMessages(chat.id);
-    setMessages(history);
-    setView('chat');
+    if (chatBusy) return;
+    setChatBusy(true);
+    setChatError('');
+    try {
+      const trimmed = ticketId.trim();
+      await ensureUser();
+      const chat = await fetchChatByTicket(trimmed);
+      setActiveChatId(chat.id);
+      setTicketCopied(false);
+      const history = await fetchChatMessages(chat.id);
+      const welcomeBack: ChatMessage = {
+        id: `local-welcome-${Date.now()}`,
+        chat_id: chat.id,
+        sender: 'agent',
+        text: 'Welcome back. A live medical support agent is ready to continue your conversation.',
+        attachment_url: null,
+        attachment_name: null,
+        attachment_type: null,
+        audio_url: null,
+        created_at: new Date().toISOString(),
+      };
+      setMessages([...history, welcomeBack]);
+      setView('chat');
+    } catch (error) {
+      console.error(error);
+      const message = error instanceof Error ? error.message : '';
+      if (message.toLowerCase().includes('anonymous sign-ins are disabled')) {
+        setChatError('Chat is unavailable: Anonymous sign-ins are disabled in Supabase Auth settings.');
+      } else {
+        setChatError('Unable to resume chat. Please check your ticket ID and try again.');
+      }
+    } finally {
+      setChatBusy(false);
+    }
   };
 
   const handleAttachClick = () => {
@@ -313,10 +340,12 @@ export function Chat() {
               <div className="flex flex-col items-center gap-4">
                 <button
                   onClick={startChat}
-                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl"
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl disabled:opacity-60"
+                  disabled={chatBusy}
                 >
-                  Start Chatting with an Agent
+                  {chatBusy ? 'Connecting...' : 'Start Chatting with an Agent'}
                 </button>
+                {chatError && <div className="text-sm text-red-600">{chatError}</div>}
                 <div className="w-full">
                   <label className="text-sm font-medium text-gray-700 block mb-2">Enter Ticket ID</label>
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -397,15 +426,16 @@ export function Chat() {
                           <div className="mt-3 bg-white/10 rounded-lg p-2 text-xs">
                             {msg.attachment_type?.startsWith('image/') ? (
                               <img src={msg.attachment_url} alt={msg.attachment_name || 'Attachment'} className="w-32 h-24 object-cover rounded-md mb-2" />
-                            ) : null}
-                            <a
-                              href={msg.attachment_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline"
-                            >
-                              {msg.attachment_name || 'View attachment'}
-                            </a>
+                            ) : (
+                              <a
+                                href={msg.attachment_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                              >
+                                {msg.attachment_name || 'View attachment'}
+                              </a>
+                            )}
                           </div>
                         )}
                         {msg.audio_url && (

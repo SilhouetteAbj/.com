@@ -153,8 +153,9 @@ export function Admin() {
   });
 
   const [authed, setAuthed] = useState(false);
-  const ADMIN_PIN = '937388';
-  const [adminPin, setAdminPin] = useState(ADMIN_PIN);
+  const ADMIN_EMAIL = 'admin@silhouette.com';
+  const ADMIN_PIN_DEFAULT = '937388';
+  const [adminPin, setAdminPin] = useState(ADMIN_PIN_DEFAULT);
   const [authError, setAuthError] = useState(false);
   const [section, setSection] = useState<Section>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile for better UX
@@ -732,7 +733,11 @@ export function Admin() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (adminPin.trim() !== ADMIN_PIN) {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: ADMIN_EMAIL,
+      password: adminPin.trim(),
+    });
+    if (error) {
       setAuthError(true);
       return;
     }

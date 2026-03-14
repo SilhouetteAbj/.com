@@ -25,7 +25,7 @@ export function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header */}
       <div className="bg-gradient-to-br from-blue-900 to-indigo-900 pt-32 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 dot-overlay-lg" />
@@ -53,20 +53,20 @@ export function Contact() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 whileHover={{ scale: 1.01 }}
-                className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-4"
+                className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-start gap-4 min-w-0"
               >
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
                   <item.icon className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900 mb-1 text-sm">{item.title}</div>
-                  <div className="text-gray-500 text-sm whitespace-pre-line">{item.content}</div>
+                  <div className="text-gray-500 text-sm whitespace-pre-line break-words">{item.content}</div>
                 </div>
               </motion.div>
             ))}
 
             {/* Abuja Branch Image */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 min-w-0">
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg1o4tEVjZivOS7MqK5w8PAlQMe7LPVqjmxQ&s"
                 alt="Silhouette Diagnostics Abuja Branch"
@@ -84,7 +84,7 @@ export function Contact() {
               href="https://maps.app.goo.gl/LBwrBPigCKHQKg4AA?g_st=aw"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-52 relative block"
+              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 h-52 relative block min-w-0"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
                 <div className="text-center">

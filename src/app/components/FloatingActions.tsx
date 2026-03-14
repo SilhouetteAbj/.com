@@ -1,9 +1,43 @@
 import { Link } from 'react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 import { trackContactClick } from '@/app/lib/analyticsStore';
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+};
 
 export function FloatingActions() {
   const [callOpen, setCallOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [canInstall, setCanInstall] = useState(false);
+
+  useEffect(() => {
+    const handlePrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+      setCanInstall(true);
+    };
+    const handleInstalled = () => {
+      setInstallPrompt(null);
+      setCanInstall(false);
+    };
+    window.addEventListener('beforeinstallprompt', handlePrompt);
+    window.addEventListener('appinstalled', handleInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handlePrompt);
+      window.removeEventListener('appinstalled', handleInstalled);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
+    setCanInstall(false);
+  };
 
   const whatsappMessage = encodeURIComponent(
     'Hello! I would like to speak with customer support.'
@@ -11,6 +45,16 @@ export function FloatingActions() {
 
   return (
     <div className="fixed bottom-24 right-6 flex flex-col gap-3 z-50">
+      {canInstall && (
+        <button
+          onClick={handleInstall}
+          aria-label="Install Silhouette Abuja"
+          title="Install App"
+          className="w-12 h-12 rounded-full overflow-hidden bg-blue-600 text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border border-blue-200"
+        >
+          <Download className="w-5 h-5" />
+        </button>
+      )}
       <a
         href={`https://wa.me/2349030002653?text=${whatsappMessage}`}
         target="_blank"

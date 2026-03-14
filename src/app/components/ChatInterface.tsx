@@ -174,15 +174,16 @@ export function ChatInterface({
                           <div className="mt-3 bg-white/10 rounded-lg p-2 text-xs">
                             {msg.attachment_type?.startsWith('image/') ? (
                               <img src={msg.attachment_url} alt={msg.attachment_name || 'Attachment'} className="w-32 h-24 object-cover rounded-md mb-2" />
-                            ) : null}
-                            <a
-                              href={msg.attachment_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline"
-                            >
-                              {msg.attachment_name || 'View attachment'}
-                            </a>
+                            ) : (
+                              <a
+                                href={msg.attachment_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                              >
+                                {msg.attachment_name || 'View attachment'}
+                              </a>
+                            )}
                           </div>
                         )}
                         {msg.audio_url && (
