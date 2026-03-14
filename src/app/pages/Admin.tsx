@@ -6,7 +6,7 @@ import {
   LayoutDashboard, MessageCircle, Calendar,
   LogOut, Bell, Search, Trash2, CheckSquare, Square,
   CheckCircle, XCircle,
-  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock, UploadCloud,
+  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock, UploadCloud, DownloadCloud,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -198,6 +198,9 @@ export function Admin() {
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [dataError, setDataError] = useState('');
   const [publishing, setPublishing] = useState(false);
+  const [pulling, setPulling] = useState(false);
+  const [hasPulled, setHasPulled] = useState(false);
+  const [pullToast, setPullToast] = useState(false);
   const [publishToast, setPublishToast] = useState(false);
   const notificationCountsRef = useRef({
     appointments: 0,
@@ -207,34 +210,132 @@ export function Admin() {
   });
   const notificationsReadyRef = useRef(false);
 
-  useEffect(() => {
-    const loadAppointments = async () => {
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) {
-        setDataError(`Unable to load appointments: ${error.message}`);
+  const fetchAppointments = async () => {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
+      setDataError(`Unable to load appointments: ${error.message}`);
+    }
+    const mapped = ((data || []) as any[]).map((row) => ({
+      id: row.id,
+      name: row.name,
+      phone: row.phone,
+      email: row.email,
+      service: row.service,
+      date: row.date,
+      time: row.time,
+      notes: row.notes,
+      status: row.status,
+      createdAt: row.created_at,
+    }));
+    setAppointments(mapped);
+    return mapped;
+  };
+
+  const fetchReferrals = async () => {
+    const { data, error } = await supabase
+      .from('referral_partners')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
+      setDataError(`Unable to load referral submissions: ${error.message}`);
+    }
+    const mapped = ((data || []) as any[]).map((p) => ({
+      id: p.id,
+      fullName: p.full_name,
+      placeOfWork: p.place_of_work,
+      phone: p.phone,
+      status: p.status,
+      referralsCount: p.referrals_count ?? 0,
+      createdAt: p.created_at,
+    }));
+    setReferralPartners(mapped);
+    return mapped;
+  };
+
+  const fetchChats = async () => {
+    const { data, error } = await supabase
+      .from('chats')
+      .select('*')
+      .order('updated_at', { ascending: false });
+    if (error) {
+      setDataError(`Unable to load chat sessions: ${error.message}`);
+    }
+    const threads = (data as ChatThread[]) || [];
+    setChatThreads(threads);
+    return threads;
+  };
+
+  const fetchLastMessages = async (threads: ChatThread[]) => {
+    if (threads.length === 0) {
+      setChatLastById({});
+      return;
+    }
+    const ids = threads.map((c) => c.id);
+    const { data, error } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .in('chat_id', ids)
+      .order('created_at', { ascending: false })
+      .limit(500);
+    if (error) {
+      setDataError(`Unable to load chat messages: ${error.message}`);
+    }
+    const map: Record<string, ChatMessage | null> = {};
+    (data || []).forEach((msg) => {
+      if (!map[msg.chat_id]) {
+        map[msg.chat_id] = msg as ChatMessage;
       }
-      const mapped = ((data || []) as any[]).map((row) => ({
-        id: row.id,
-        name: row.name,
-        phone: row.phone,
-        email: row.email,
-        service: row.service,
-        date: row.date,
-        time: row.time,
-        notes: row.notes,
-        status: row.status,
-        createdAt: row.created_at,
-      }));
-      setAppointments(mapped);
-    };
-    void loadAppointments();
+    });
+    setChatLastById(map);
+  };
+
+  const fetchSelectedMessages = async (thread: ChatThread | null) => {
+    if (!thread) {
+      setChatMessages([]);
+      return;
+    }
+    const data = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('chat_id', thread.id)
+      .order('created_at', { ascending: true });
+    if (data.error) {
+      setDataError(`Unable to load selected chat: ${data.error.message}`);
+    }
+    setChatMessages((data.data as ChatMessage[]) || []);
+  };
+
+  const fetchAnalytics = async () => {
+    const data = await loadAnalytics();
+    if (data.pageViews.length === 0 && data.testSelections.length === 0 && data.contactClicks.length === 0) {
+      setDataError((prev) => prev || 'No analytics data found. Ensure tracking is enabled and Supabase allows reads.');
+    }
+    setAnalytics(data);
+  };
+
+  const handlePullUpdates = async () => {
+    if (pulling) return;
+    setPulling(true);
+    setDataError('');
+    const threads = await fetchChats();
+    await Promise.all([fetchAppointments(), fetchReferrals(), fetchAnalytics()]);
+    await fetchLastMessages(threads);
+    await fetchSelectedMessages(selectedThread);
+    setHasPulled(true);
+    setPullToast(true);
+    window.setTimeout(() => setPullToast(false), 2500);
+    setPulling(false);
+  };
+
+  useEffect(() => {
+    void fetchAppointments();
     const channel = supabase
       .channel('admin-appointments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
-        void loadAppointments();
+        void fetchAppointments();
       })
       .subscribe();
     return () => {
@@ -270,30 +371,11 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
-    const loadReferrals = async () => {
-      const { data, error } = await supabase
-        .from('referral_partners')
-        .select('*')
-        .order('created_at', { ascending: false });
-      if (error) {
-        setDataError(`Unable to load referral submissions: ${error.message}`);
-      }
-      const mapped = ((data || []) as any[]).map((p) => ({
-        id: p.id,
-        fullName: p.full_name,
-        placeOfWork: p.place_of_work,
-        phone: p.phone,
-        status: p.status,
-        referralsCount: p.referrals_count ?? 0,
-        createdAt: p.created_at,
-      }));
-      setReferralPartners(mapped);
-    };
-    void loadReferrals();
+    void fetchReferrals();
     const channel = supabase
       .channel('admin-referrals')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'referral_partners' }, () => {
-        void loadReferrals();
+        void fetchReferrals();
       })
       .subscribe();
     return () => {
@@ -302,21 +384,11 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
-    const loadChats = async () => {
-      const { data, error } = await supabase
-        .from('chats')
-        .select('*')
-        .order('updated_at', { ascending: false });
-      if (error) {
-        setDataError(`Unable to load chat sessions: ${error.message}`);
-      }
-      setChatThreads((data as ChatThread[]) || []);
-    };
-    void loadChats();
+    void fetchChats();
     const channel = supabase
       .channel('admin-chats')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => {
-        void loadChats();
+        void fetchChats();
       })
       .subscribe();
     return () => {
@@ -325,34 +397,11 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
-    const loadLastMessages = async () => {
-      if (chatThreads.length === 0) {
-        setChatLastById({});
-        return;
-      }
-      const ids = chatThreads.map((c) => c.id);
-      const { data, error } = await supabase
-        .from('chat_messages')
-        .select('*')
-        .in('chat_id', ids)
-        .order('created_at', { ascending: false })
-        .limit(500);
-      if (error) {
-        setDataError(`Unable to load chat messages: ${error.message}`);
-      }
-      const map: Record<string, ChatMessage | null> = {};
-      (data || []).forEach((msg) => {
-        if (!map[msg.chat_id]) {
-          map[msg.chat_id] = msg as ChatMessage;
-        }
-      });
-      setChatLastById(map);
-    };
-    void loadLastMessages();
+    void fetchLastMessages(chatThreads);
     const channel = supabase
       .channel('admin-chat-messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, () => {
-        void loadLastMessages();
+        void fetchLastMessages(chatThreads);
       })
       .subscribe();
     return () => {
@@ -361,22 +410,7 @@ export function Admin() {
   }, [chatThreads]);
 
   useEffect(() => {
-    const loadSelectedMessages = async () => {
-      if (!selectedThread) {
-        setChatMessages([]);
-        return;
-      }
-      const data = await supabase
-        .from('chat_messages')
-        .select('*')
-        .eq('chat_id', selectedThread.id)
-        .order('created_at', { ascending: true });
-      if (data.error) {
-        setDataError(`Unable to load selected chat: ${data.error.message}`);
-      }
-      setChatMessages((data.data as ChatMessage[]) || []);
-    };
-    void loadSelectedMessages();
+    void fetchSelectedMessages(selectedThread);
     if (!selectedThread) return undefined;
     const channel = supabase
       .channel(`admin-chat-${selectedThread.id}`)
@@ -395,16 +429,8 @@ export function Admin() {
   }, [selectedThread]);
 
   useEffect(() => {
-    const load = async () => {
-      const data = await loadAnalytics();
-      if (data.pageViews.length === 0 && data.testSelections.length === 0 && data.contactClicks.length === 0) {
-        // Keep existing error if already set by other loaders.
-        setDataError((prev) => prev || 'No analytics data found. Ensure tracking is enabled and Supabase allows reads.');
-      }
-      setAnalytics(data);
-    };
-    void load();
-    const handleFocus = () => void load();
+    void fetchAnalytics();
+    const handleFocus = () => void fetchAnalytics();
     window.addEventListener('focus', handleFocus);
     return () => {
       window.removeEventListener('focus', handleFocus);
@@ -799,6 +825,7 @@ export function Admin() {
     } else {
       setPublishToast(true);
       window.setTimeout(() => setPublishToast(false), 3000);
+      setHasPulled(false);
     }
     setPublishing(false);
   };
@@ -872,6 +899,11 @@ export function Admin() {
       {publishToast && (
         <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
           Update published. Users will refresh automatically.
+        </div>
+      )}
+      {pullToast && (
+        <div className="fixed top-20 right-6 z-50 bg-blue-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
+          Pulled latest data from Supabase.
         </div>
       )}
       {/* Mobile Backdrop Overlay */}
@@ -971,12 +1003,14 @@ export function Admin() {
               />
             </div>
             <button
-              onClick={handlePublish}
-              disabled={publishing}
+              onClick={hasPulled ? handlePublish : handlePullUpdates}
+              disabled={publishing || pulling}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-60"
             >
-              <UploadCloud className="w-4 h-4" />
-              {publishing ? 'Publishing...' : 'Publish Update'}
+              {hasPulled ? <UploadCloud className="w-4 h-4" /> : <DownloadCloud className="w-4 h-4" />}
+              {hasPulled
+                ? (publishing ? 'Publishing...' : 'Publish Update')
+                : (pulling ? 'Pulling...' : 'Pull Updates')}
             </button>
             <div className="relative">
               <button
