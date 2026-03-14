@@ -153,8 +153,8 @@ export function Admin() {
   });
 
   const [authed, setAuthed] = useState(false);
-  const [adminEmail, setAdminEmail] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
+  const ADMIN_PIN = '937388';
+  const [adminPin, setAdminPin] = useState(ADMIN_PIN);
   const [authError, setAuthError] = useState(false);
   const [section, setSection] = useState<Section>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile for better UX
@@ -179,6 +179,7 @@ export function Admin() {
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatLastById, setChatLastById] = useState<Record<string, ChatMessage | null>>({});
+  const selectedThread = chatThreads.find((t) => t.ticket_id === selectedChatId) || null;
   
   const [referralPartners, setReferralPartners] = useState<ReferralPartner[]>([]);
   const [activePartner, setActivePartner] = useState<ReferralPartner | null>(null);
@@ -635,7 +636,6 @@ export function Admin() {
       };
     });
 
-  const selectedThread = chatThreads.find((t) => t.ticket_id === selectedChatId) || null;
 
   const navItems: { id: Section; label: string; icon: ElementType; badge?: number }[] = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
@@ -732,11 +732,7 @@ export function Admin() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: adminEmail.trim(),
-      password: adminPassword,
-    });
-    if (error) {
+    if (adminPin.trim() !== ADMIN_PIN) {
       setAuthError(true);
       return;
     }
@@ -784,25 +780,18 @@ export function Admin() {
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin Email</label>
-              <input
-                type="email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                placeholder="admin@silhouette.com"
-                className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${authError ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Admin PIN</label>
               <input
                 type="password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                placeholder="Enter admin password"
+                value={adminPin}
+                onChange={(e) => setAdminPin(e.target.value)}
+                placeholder="Enter 6-digit PIN"
+                aria-label="Admin PIN"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${authError ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
               />
-              {authError && <p className="text-red-500 text-xs mt-1">Invalid admin credentials.</p>}
+              {authError && <p className="text-red-500 text-xs mt-1">Invalid admin PIN.</p>}
             </div>
             <button type="submit" className="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-xl shadow-lg hover:opacity-90 transition-opacity">
               Login to Dashboard

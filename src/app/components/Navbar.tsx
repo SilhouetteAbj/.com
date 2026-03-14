@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, Phone, ChevronDown } from 'lucide-react';
 import { SERVICE_CATEGORIES } from '@/app/data/servicesData';
@@ -28,6 +28,9 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const logoClickTimerRef = useRef<number | null>(null);
+  const logoClickCountRef = useRef(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -43,6 +46,27 @@ export function Navbar() {
   const isActive = (href: string) =>
     href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
 
+  const handleLogoClick = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      return;
+    }
+    logoClickCountRef.current += 1;
+    if (logoClickTimerRef.current) {
+      window.clearTimeout(logoClickTimerRef.current);
+    }
+    if (logoClickCountRef.current >= 5) {
+      logoClickCountRef.current = 0;
+      logoClickTimerRef.current = null;
+      navigate('/admin');
+      return;
+    }
+    logoClickTimerRef.current = window.setTimeout(() => {
+      logoClickCountRef.current = 0;
+      logoClickTimerRef.current = null;
+    }, 1800);
+  };
+
   return (
     <motion.nav
       initial={{ y: -80, opacity: 0 }}
@@ -57,11 +81,16 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-full overflow-hidden shadow-md group-hover:shadow-blue-400/50 transition-shadow duration-300 bg-white">
+          <div className="flex items-center gap-3 group">
+            <button
+              type="button"
+              onClick={handleLogoClick}
+              className="w-10 h-10 rounded-full overflow-hidden shadow-md group-hover:shadow-blue-400/50 transition-shadow duration-300 bg-white"
+              aria-label="Silhouette Diagnostics logo"
+            >
               <img src={LOGO_URL} alt="Silhouette Diagnostics logo" className="w-full h-full object-cover" />
-            </div>
-            <div>
+            </button>
+            <Link to="/" className="block">
               <div
                 className={`font-bold text-sm leading-tight transition-colors duration-300 ${
                   scrolled ? 'text-blue-900' : 'text-white'
@@ -76,8 +105,8 @@ export function Navbar() {
               >
                 Diagnostics Consultants
               </div>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex items-center gap-1">
