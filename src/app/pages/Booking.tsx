@@ -2,22 +2,10 @@ import { useState } from 'react';
 import { useMetaTags } from '@/hooks/useMetaTags';
 import { motion, AnimatePresence } from 'motion/react';
 import type { FormEvent } from 'react';
-import { Calendar, Clock, User, Phone, Mail, CheckCircle, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, User, Phone, Mail, CheckCircle, ArrowRight, Search } from 'lucide-react';
 import { trackLiveAction, trackTestSelection } from '@/app/lib/analyticsStore';
 import { supabase } from '@/app/lib/supabaseClient';
-
-const services = [
-  'MRI Scan',
-  '4D Ultrasound',
-  'Mammogram',
-  'Endoscopy',
-  'Colonoscopy',
-  'EEG',
-  'DNA Paternity Test',
-  'DNA Immigration Test',
-  'DNA Family Relationship Test',
-  'Other (specify in message)',
-];
+import { SERVICE_CATEGORIES } from '@/app/data/servicesData';
 
 const timeSlots = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
 
@@ -72,6 +60,7 @@ export function Booking() {
     time: '',
     notes: '',
   });
+  const [serviceSearch, setServiceSearch] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -118,6 +107,19 @@ export function Booking() {
   };
 
   const today = new Date().toISOString().split('T')[0];
+  const serviceOptions = SERVICE_CATEGORIES.flatMap((category) => ([
+    { value: category.title, label: `${category.title} (Category)`, category: category.title },
+    ...category.tests.map((test) => ({
+      value: test.name,
+      label: `${test.name} — ${category.title}`,
+      category: category.title,
+    })),
+  ]));
+  const normalizedServiceSearch = serviceSearch.trim().toLowerCase();
+  const filteredServices = normalizedServiceSearch
+    ? serviceOptions.filter((option) => option.label.toLowerCase().includes(normalizedServiceSearch))
+    : serviceOptions;
+  const serviceSuggestions = filteredServices.slice(0, 6);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -248,6 +250,33 @@ export function Booking() {
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">
                         Service Requested <span className="text-red-500">*</span>
                       </label>
+                      <div className="relative mb-3">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                          type="text"
+                          value={serviceSearch}
+                          onChange={(e) => setServiceSearch(e.target.value)}
+                          placeholder="Search tests or categories..."
+                          className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
+                      </div>
+                      {serviceSuggestions.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {serviceSuggestions.map((option) => (
+                            <button
+                              key={option.label}
+                              type="button"
+                              onClick={() => {
+                                setForm({ ...form, service: option.value });
+                                setServiceSearch(option.label);
+                              }}
+                              className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full hover:bg-blue-100"
+                            >
+                              {option.value}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                       <select
                         aria-label="Service Requested"
                         value={form.service}
@@ -255,7 +284,11 @@ export function Booking() {
                         className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white ${errors.service ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                       >
                         <option value="">Select a service...</option>
-                        {services.map((s) => <option key={s} value={s}>{s}</option>)}
+                        {filteredServices.map((option) => (
+                          <option key={option.label} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
                       </select>
                       {errors.service && <p className="text-red-500 text-xs mt-1">{errors.service}</p>}
                     </div>

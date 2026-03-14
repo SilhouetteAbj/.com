@@ -158,7 +158,7 @@ export function Admin() {
   const [adminPin, setAdminPin] = useState(ADMIN_PIN_DEFAULT);
   const [authError, setAuthError] = useState(false);
   const [section, setSection] = useState<Section>('overview');
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Start closed on mobile for better UX
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const today = new Date().toISOString().split('T')[0];
   const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
   const [appointmentSearch, setAppointmentSearch] = useState('');
@@ -196,6 +196,7 @@ export function Admin() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
+  const [dataError, setDataError] = useState('');
   const notificationCountsRef = useRef({
     appointments: 0,
     referrals: 0,
@@ -206,10 +207,13 @@ export function Admin() {
 
   useEffect(() => {
     const loadAppointments = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('appointments')
         .select('*')
         .order('created_at', { ascending: false });
+      if (error) {
+        setDataError(`Unable to load appointments: ${error.message}`);
+      }
       const mapped = ((data || []) as any[]).map((row) => ({
         id: row.id,
         name: row.name,
@@ -247,11 +251,20 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
+    if (window.innerWidth < 1024) {
+      setSidebarOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
     const loadReferrals = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('referral_partners')
         .select('*')
         .order('created_at', { ascending: false });
+      if (error) {
+        setDataError(`Unable to load referral submissions: ${error.message}`);
+      }
       const mapped = ((data || []) as any[]).map((p) => ({
         id: p.id,
         fullName: p.full_name,
@@ -277,10 +290,13 @@ export function Admin() {
 
   useEffect(() => {
     const loadChats = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('chats')
         .select('*')
         .order('updated_at', { ascending: false });
+      if (error) {
+        setDataError(`Unable to load chat sessions: ${error.message}`);
+      }
       setChatThreads((data as ChatThread[]) || []);
     };
     void loadChats();
@@ -302,12 +318,15 @@ export function Admin() {
         return;
       }
       const ids = chatThreads.map((c) => c.id);
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
         .in('chat_id', ids)
         .order('created_at', { ascending: false })
         .limit(500);
+      if (error) {
+        setDataError(`Unable to load chat messages: ${error.message}`);
+      }
       const map: Record<string, ChatMessage | null> = {};
       (data || []).forEach((msg) => {
         if (!map[msg.chat_id]) {
@@ -339,6 +358,9 @@ export function Admin() {
         .select('*')
         .eq('chat_id', selectedThread.id)
         .order('created_at', { ascending: true });
+      if (data.error) {
+        setDataError(`Unable to load selected chat: ${data.error.message}`);
+      }
       setChatMessages((data.data as ChatMessage[]) || []);
     };
     void loadSelectedMessages();
@@ -362,6 +384,10 @@ export function Admin() {
   useEffect(() => {
     const load = async () => {
       const data = await loadAnalytics();
+      if (data.pageViews.length === 0 && data.testSelections.length === 0 && data.contactClicks.length === 0) {
+        // Keep existing error if already set by other loaders.
+        setDataError((prev) => prev || 'No analytics data found. Ensure tracking is enabled and Supabase allows reads.');
+      }
       setAnalytics(data);
     };
     void load();
@@ -892,7 +918,7 @@ export function Admin() {
         {/* Top bar */}
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden mr-2">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg hover:bg-gray-100 transition-colors mr-2">
               {sidebarOpen ? <X className="w-5 h-5 text-gray-600" /> : <Menu className="w-5 h-5 text-gray-600" />}
             </button>
             <h1 className="font-bold text-gray-900 text-sm sm:text-base">{currentSection?.label}</h1>
