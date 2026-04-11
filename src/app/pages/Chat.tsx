@@ -15,7 +15,7 @@ import {
 } from '@/app/lib/chatService';
 import { trackLiveAction } from '@/app/lib/analyticsStore';
 
-const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgsnOwbpMeE0JQrY76UgyB7dmoD6z3P8_WrA&s';
+const LOGO_URL = '/brand/silhouette-logo-source.png';
 const FAQS = [
   {
     q: 'How soon are results ready?',
@@ -61,6 +61,7 @@ export function Chat() {
   const audioChunksRef = useRef<Blob[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const supportsRecording = typeof MediaRecorder !== 'undefined';
+  const isDashboardView = view === 'dashboard';
 
   const sendMessage = async () => {
     if (!chatInput.trim()) return;
@@ -295,7 +296,13 @@ export function Chat() {
   }, [view, activeChatId]);
 
   return (
-    <div className="w-screen min-h-[100dvh] bg-white flex flex-col overflow-x-hidden overscroll-y-contain">
+    <div
+      className={`w-full bg-white overflow-x-hidden ${
+        isDashboardView
+          ? 'min-h-[100dvh] overflow-y-auto'
+          : 'h-[100dvh] flex flex-col overflow-hidden'
+      }`}
+    >
       {/* Sticky Header */}
       <div className="sticky top-0 z-50 bg-white border-b border-blue-100 shadow-sm">
         <div className="h-16 px-4 flex items-center gap-4">
@@ -319,9 +326,9 @@ export function Chat() {
         </div>
       </div>
 
-      {view === 'dashboard' ? (
-        <div className="flex-1 flex items-center justify-center bg-blue-50/40 px-4 py-10">
-          <div className="w-full max-w-3xl space-y-6">
+      {isDashboardView ? (
+        <div className="bg-blue-50/40 px-4 py-10 sm:py-14">
+          <div className="mx-auto flex w-full max-w-3xl flex-col justify-center gap-6 sm:min-h-[calc(100dvh-11rem)]">
             <div className="text-center space-y-2">
               <h2 className="text-3xl font-bold text-gray-900">Talk to our Medical Support Team</h2>
               <p className="text-sm text-gray-600">A real person is ready to assist you.</p>

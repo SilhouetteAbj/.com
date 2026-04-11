@@ -37,7 +37,7 @@ function Badge({
   ...props
 }: React.ComponentProps<"span"> &
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "span";
+  const Comp = (asChild ? Slot : "span") as React.ElementType;
   // Add pulse-vital to status badges (variant default or secondary)
   const isStatus = !variant || variant === "default" || variant === "secondary";
   const pulseClass = isStatus ? `pulse-vital ${getPulseDelayClass()}` : "";

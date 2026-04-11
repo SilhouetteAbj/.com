@@ -3,14 +3,14 @@ import { useMetaTags } from '@/hooks/useMetaTags';
 import { motion } from 'motion/react';
 import { useEffect } from 'react';
 import type { ElementType } from 'react';
-import { Calendar, Clock, CheckCircle, ArrowLeft, MessageCircle, Activity, Brain, Heart, Eye, Dna, Scan, FlaskConical } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, ArrowLeft, Activity, Brain, Heart, Eye, Scan, FlaskConical } from 'lucide-react';
 import { trackTestSelection } from '@/app/lib/analyticsStore';
 
-const LAB_IMG = 'https://images.unsplash.com/photo-1578496479530-799fd6d0803a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwZGlhZ25vc3RpYyUyMGxhYm9yYXRvcnklMjBkb2N0b3J8ZW58MXx8fHwxNzcyNzAxNTQwfDA&ixlib=rb-4.1.0&q=80&w=1080';
-const CT_IMG = 'https://medicaidradiology.com/assets/img/service/ct1.jpg';
-const US_IMG = 'https://static.wixstatic.com/media/e1a4cd_09474dbb981041ce9c17b32ecb2cda2a~mv2.jpg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/e1a4cd_09474dbb981041ce9c17b32ecb2cda2a~mv2.jpg';
-const US_COMPARISON_IMG = 'https://venuswomenshospital.com/uploads/image/3d-4d.jpg';
-const MAMMOGRAM_IMG = 'https://domf5oio6qrcr.cloudfront.net/medialibrary/15749/b4c809a0-f4ef-4fd0-8a87-5db2eee50e9f.jpg';
+const LAB_IMG = '/images/shared/lab-diagnostics.jpg';
+const CT_IMG = '/images/service-detail/ct-scan.jpg';
+const US_IMG = '/images/shared/ultrasound-lab.jpg';
+const US_COMPARISON_IMG = '/images/service-detail/ultrasound-4d.jpg';
+const MAMMOGRAM_IMG = '/images/service-detail/mammogram.jpg';
 
 const serviceData: Record<string, {
   name: string;

@@ -2,7 +2,7 @@ import { ArrowLeft, Paperclip, Send, Mic, Square, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { ChatMessage } from '@/app/lib/chatService';
 
-const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgsnOwbpMeE0JQrY76UgyB7dmoD6z3P8_WrA&s';
+const LOGO_URL = '/brand/silhouette-logo-source.png';
 
 interface ChatInterfaceProps {
   selectedChat: { ticketId: string; name: string; chatId: string } | null;
@@ -117,28 +117,30 @@ export function ChatInterface({
   }, []);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="bg-white shadow-sm border border-gray-100 overflow-hidden flex flex-col h-full rounded-2xl">
-        <div className="p-4 border-b border-blue-100 flex items-center justify-between bg-white">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={onBack}
-              className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="Back to inbox"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <div className="w-10 h-10 rounded-full overflow-hidden border border-blue-100">
-              <img src={LOGO_URL} alt="Silhouette Diagnostics" className="w-full h-full object-cover" />
-            </div>
-            <div>
-              <p className="font-semibold text-gray-900 text-sm">{selectedChat?.name || 'Support Chat'}</p>
-              <p className="text-xs text-gray-500">Ticket: {selectedChat?.ticketId || 'N/A'}</p>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="fixed inset-0 z-50 flex min-h-0 flex-col bg-white lg:static lg:z-auto lg:h-full lg:overflow-hidden lg:rounded-2xl lg:border lg:border-gray-100 lg:shadow-sm">
+        <div className="shrink-0 border-b border-blue-100 bg-white px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onBack}
+                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Back to inbox"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+              <div className="w-10 h-10 rounded-full overflow-hidden border border-blue-100">
+                <img src={LOGO_URL} alt="Silhouette Diagnostics" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 text-sm">{selectedChat?.name || 'Support Chat'}</p>
+                <p className="text-xs text-gray-500">Ticket: {selectedChat?.ticketId || 'N/A'}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-1 p-4 space-y-4 overflow-y-auto bg-blue-50/40">
+        <div className="min-h-0 flex-1 overflow-y-auto bg-blue-50/40 p-4 space-y-4">
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-sm text-gray-500">
               No messages yet.
@@ -205,7 +207,7 @@ export function ChatInterface({
           )}
         </div>
 
-        <div className="sticky bottom-0 border-t border-blue-100 bg-white shadow-[0_-4px_12px_rgba(30,64,175,0.08)]">
+        <div className="shrink-0 border-t border-blue-100 bg-white shadow-[0_-4px_12px_rgba(30,64,175,0.08)]">
           <div className="px-4 py-3 flex items-center gap-3">
             <input
               ref={fileInputRef}

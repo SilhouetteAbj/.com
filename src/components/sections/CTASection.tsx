@@ -51,11 +51,11 @@ export function CTASection() {
             +2349030002653
           </a>
           <a
-            href="tel:+2348101196774"
+            href="tel:+2349071920849"
             className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-blue-500/30 border-2 border-white text-white font-bold rounded-xl hover:bg-blue-500/40 transition-all duration-200"
           >
             <Phone className="w-5 h-5" />
-            +2348101196774
+            +2349071920849
           </a>
         </FadeInSection>
 

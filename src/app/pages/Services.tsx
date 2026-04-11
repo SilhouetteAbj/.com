@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router';
 import { motion, useInView } from 'motion/react';
 import { Search, ArrowRight, FlaskConical, Microscope, Activity, Shield, Star } from 'lucide-react';
 import { SERVICE_CATEGORIES, TOTAL_TESTS, TOTAL_CATEGORIES } from '../data/servicesData';
+import { HEALTH_DISCOUNT_HEADLINE, HEALTH_DISCOUNT_NOTE } from '@/app/data/discountPromotion';
 import '@/styles/services.css';
 
-const SERVICES_HERO_IMG = 'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&fm=jpg&q=60&w=3000';
+const SERVICES_HERO_IMG = '/images/pages/services-hero.jpg';
 
 function FadeIn({
   children,
@@ -164,6 +165,15 @@ export function Services() {
             </p>
           </motion.div>
 
+          <div className="mx-auto mb-8 max-w-2xl rounded-[24px] border border-blue-300/20 bg-blue-400/10 px-4 py-4 text-left shadow-[0_16px_45px_rgba(0,82,255,0.14)]">
+            <div className="text-sm font-semibold text-blue-100 sm:text-base">
+              {HEALTH_DISCOUNT_HEADLINE}
+            </div>
+            <p className="mt-2 text-sm leading-6 text-blue-50/80">
+              {HEALTH_DISCOUNT_NOTE}
+            </p>
+          </div>
+
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
@@ -193,6 +203,15 @@ export function Services() {
                   ×
                 </button>
               )}
+            </div>
+
+            <div className="mt-4 rounded-[22px] border border-blue-300/18 bg-blue-400/10 px-4 py-3 text-center shadow-[0_12px_30px_rgba(0,82,255,0.12)]">
+              <div className="text-sm font-semibold text-blue-100">
+                {HEALTH_DISCOUNT_HEADLINE}
+              </div>
+              <p className="mt-1 text-xs leading-5 text-blue-50/80 sm:text-sm">
+                {HEALTH_DISCOUNT_NOTE}
+              </p>
             </div>
 
             {searchHits.length > 0 && (

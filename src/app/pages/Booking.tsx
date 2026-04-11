@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMetaTags } from '@/hooks/useMetaTags';
 import { motion, AnimatePresence } from 'motion/react';
 import type { FormEvent } from 'react';
+import { useSearchParams } from 'react-router';
 import { Calendar, Clock, User, Phone, Mail, CheckCircle, ArrowRight, Search } from 'lucide-react';
 import { trackLiveAction, trackTestSelection } from '@/app/lib/analyticsStore';
-import { supabase } from '@/app/lib/supabaseClient';
+import { submitPublicAppointment } from '@/app/lib/publicApi';
 import { SERVICE_CATEGORIES } from '@/app/data/servicesData';
 
 const timeSlots = ['7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
@@ -27,21 +28,12 @@ const saveAppointment = async (appointment: {
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: string;
 }) => {
-  await supabase.from('appointments').insert({
-    id: appointment.id,
-    name: appointment.name,
-    phone: appointment.phone,
-    email: appointment.email,
-    service: appointment.service,
-    date: appointment.date,
-    time: appointment.time,
-    notes: appointment.notes,
-    status: appointment.status,
-    created_at: appointment.createdAt,
-  });
+  await submitPublicAppointment(appointment);
 };
 
 export function Booking() {
+  const [searchParams] = useSearchParams();
+
   useMetaTags({
     title: 'Book an Appointment - Silhouette Diagnostics',
     description: 'Schedule your diagnostic appointment with Silhouette Diagnostics. Fast, convenient, and professional medical services.',
@@ -64,6 +56,21 @@ export function Booking() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
+
+  useEffect(() => {
+    const preselectedTest = searchParams.get('test');
+    const preselectedCategory = searchParams.get('category');
+    const nextService = preselectedTest ?? preselectedCategory;
+
+    if (!nextService) return;
+
+    setForm((current) => (
+      current.service === nextService
+        ? current
+        : { ...current, service: current.service || nextService }
+    ));
+  }, [searchParams]);
 
   const validate = () => {
     const e: Record<string, string> = {};
@@ -82,6 +89,8 @@ export function Booking() {
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
+    setSubmitError('');
+    setLoading(true);
     const appointment = {
       id: generateAppointmentId(),
       name: form.name.trim(),
@@ -94,16 +103,18 @@ export function Booking() {
       status: 'pending' as const,
       createdAt: new Date().toISOString(),
     };
-    await saveAppointment(appointment);
-    trackLiveAction('booking');
-    if (form.service) {
-      trackTestSelection(form.service);
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await saveAppointment(appointment);
+      trackLiveAction('booking');
+      if (form.service) {
+        trackTestSelection(form.service);
+      }
       setSubmitted(true);
-    }, 1800);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to submit your appointment right now.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const today = new Date().toISOString().split('T')[0];
@@ -173,7 +184,11 @@ export function Booking() {
                 </ul>
               </div>
               <button
-                onClick={() => { setSubmitted(false); setForm({ name: '', phone: '', email: '', service: '', date: '', time: '', notes: '' }); }}
+                onClick={() => {
+                  setSubmitted(false);
+                  setSubmitError('');
+                  setForm({ name: '', phone: '', email: '', service: '', date: '', time: '', notes: '' });
+                }}
                 className="px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
               >
                 Book Another Appointment
@@ -191,6 +206,11 @@ export function Booking() {
                 <div className="lg:col-span-2">
                   <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 space-y-6">
                     <h2 className="text-xl font-bold text-gray-900 mb-2">Patient Information</h2>
+                    {submitError && (
+                      <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        {submitError}
+                      </div>
+                    )}
 
                     {/* Name */}
                     <div>
@@ -373,7 +393,7 @@ export function Booking() {
                     <h3 className="font-bold text-gray-900 mb-4">Contact Information</h3>
                     <div className="space-y-3 text-sm text-gray-600">
                       <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-blue-600" /> +2349030002653</div>
-                      <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-blue-600" /> +2348101196774</div>
+                      <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-blue-600" /> +2349071920849</div>
                       <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-blue-600" /> silhouetteradiodiagnostics@gmail.com</div>
                     </div>
                   </div>

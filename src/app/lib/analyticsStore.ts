@@ -1,4 +1,5 @@
 import { supabase } from '@/app/lib/supabaseClient';
+import { trackAnalyticsEvent } from '@/app/lib/publicApi';
 
 export type DailyCount = {
   date: string;
@@ -20,15 +21,15 @@ const getToday = () => new Date().toISOString().split('T')[0];
 const inMemoryVisitorSet = new Set<string>();
 
 const recordEvent = async (eventType: string, item: string, path?: string) => {
-  if (!supabase) return;
-  const { data: sessionData } = await supabase.auth.getSession();
-  const userId = sessionData.session?.user?.id || null;
-  await supabase.from('analytics_events').insert({
-    event_type: eventType,
-    item,
-    path: path || null,
-    user_id: userId,
-  });
+  try {
+    await trackAnalyticsEvent({
+      eventType,
+      item,
+      path: path || null,
+    });
+  } catch (error) {
+    console.warn('Analytics event failed to record:', error);
+  }
 };
 
 const aggregateDaily = (rows: Array<{ created_at: string; item: string }>): DailyCount[] => {

@@ -1,0 +1,197 @@
+[
+  {
+    "key": "laboratory:fbc",
+    "description": "General blood screening often used for fatigue, weakness, infections, and routine wellness checks.",
+    "keywords": ["full body checkup", "routine check", "wellness screening", "fatigue", "weakness", "infection", "blood work", "general health"]
+  },
+  {
+    "key": "laboratory:fasting-blood-sugar",
+    "description": "Blood sugar screening commonly suggested for frequent urination, unusual thirst, and suspected diabetes.",
+    "keywords": ["diabetes", "frequent urination", "excessive thirst", "high sugar", "blood sugar", "weight loss", "tired all the time"]
+  },
+  {
+    "key": "laboratory:hba1c",
+    "description": "Long-term blood sugar test used to monitor diabetes control over the last few months.",
+    "keywords": ["diabetes monitoring", "sugar control", "long term glucose", "high blood sugar", "prediabetes"]
+  },
+  {
+    "key": "laboratory:malaria-rdt",
+    "description": "Rapid blood test often recommended for fever, chills, body aches, and suspected malaria infection.",
+    "keywords": ["malaria", "malaria symptoms", "persistent fever", "chills", "body ache", "headache", "mosquito bite", "weakness"]
+  },
+  {
+    "key": "laboratory:malaria-film",
+    "description": "Microscopy test used to confirm malaria parasites when symptoms strongly suggest infection.",
+    "keywords": ["malaria confirmation", "malaria parasite", "recurrent fever", "severe chills", "blood parasite"]
+  },
+  {
+    "key": "laboratory:beta-hcg",
+    "description": "Pregnancy blood test commonly used for early pregnancy confirmation and hormone monitoring.",
+    "keywords": ["pregnancy check", "pregnancy test", "pregnant", "missed period", "early pregnancy", "morning sickness", "pregnat"]
+  },
+  {
+    "key": "laboratory:urinalysis",
+    "description": "Urine screening often used for burning urination, lower abdominal discomfort, and possible urinary tract infection.",
+    "keywords": ["uti", "burning urination", "painful urination", "frequent urination", "urine infection", "cloudy urine", "lower abdominal pain"]
+  },
+  {
+    "key": "laboratory:tsh",
+    "description": "Thyroid hormone screening used for unexplained weight changes, tiredness, and suspected thyroid imbalance.",
+    "keywords": ["thyroid", "weight change", "tiredness", "cold intolerance", "hair loss", "neck swelling", "hormone imbalance"]
+  },
+  {
+    "key": "scan-ultrasound:ob-1st",
+    "description": "Early pregnancy ultrasound used to confirm pregnancy location, viability, and gestational age.",
+    "keywords": ["pregnancy scan", "early pregnancy", "pregnancy check", "pregnant", "first trimester", "dating scan", "missed period", "pregnat"]
+  },
+  {
+    "key": "scan-ultrasound:ob-anomaly",
+    "description": "Detailed pregnancy scan used to assess fetal anatomy and development during pregnancy.",
+    "keywords": ["pregnancy anomaly", "baby development", "pregnancy morphology", "fetal anatomy", "pregnancy check", "second trimester scan"]
+  },
+  {
+    "key": "scan-ultrasound:ob-4d",
+    "description": "Advanced pregnancy ultrasound that provides live 4D imaging for fetal development and bonding.",
+    "keywords": ["4d ultrasound", "baby scan", "pregnancy scan", "pregnant", "fetal movement", "gender scan"]
+  },
+  {
+    "key": "scan-ultrasound:pelvic",
+    "description": "Pelvic imaging commonly suggested for lower abdominal pain, menstrual concerns, and reproductive health checks.",
+    "keywords": ["pelvic pain", "lower abdominal pain", "fibroid", "menstrual pain", "ovary pain", "female fertility", "uterus check"]
+  },
+  {
+    "key": "scan-ultrasound:renal",
+    "description": "Kidney ultrasound often used for flank pain, urinary symptoms, and suspected kidney stones or obstruction.",
+    "keywords": ["kidney pain", "flank pain", "back pain", "urinary problem", "kidney stone", "renal scan", "waist pain"]
+  },
+  {
+    "key": "scan-ultrasound:lung",
+    "description": "Chest ultrasound used to assess fluid, inflammation, and selected respiratory concerns.",
+    "keywords": ["persistent cough", "breathing difficulty", "chest infection", "lung fluid", "shortness of breath", "respiratory symptoms"]
+  },
+  {
+    "key": "scan-ultrasound:breast",
+    "description": "Breast imaging used for breast pain, lumps, and follow-up evaluation of breast changes.",
+    "keywords": ["breast pain", "breast lump", "breast scan", "breast check", "nipple discharge"]
+  },
+  {
+    "key": "xray:chest-pa",
+    "description": "Chest X-ray often recommended for persistent cough, chest pain, fever, and breathing concerns.",
+    "keywords": ["persistent cough", "chest pain", "breathing problem", "pneumonia", "shortness of breath", "tb screening", "lung infection"]
+  },
+  {
+    "key": "xray:l-spine",
+    "description": "Lumbar spine X-ray used to assess lower back pain, posture issues, and suspected spinal injury.",
+    "keywords": ["lower back pain", "back pain", "lumbar pain", "spine injury", "waist pain", "posture pain"]
+  },
+  {
+    "key": "mri:mri-lspine",
+    "description": "Detailed lower back imaging used for persistent lumbar pain, nerve symptoms, and disc evaluation.",
+    "keywords": ["lower back pain", "lumbar pain", "slipped disc", "nerve pain", "sciatica", "back pain", "disc problem"]
+  },
+  {
+    "key": "mri:mri-brain",
+    "description": "Brain MRI is commonly suggested for severe headaches, seizures, dizziness, and neurological symptoms.",
+    "keywords": ["headache", "migraine", "brain scan", "dizziness", "seizure", "stroke symptoms", "memory problem"]
+  },
+  {
+    "key": "mri:mri-knee",
+    "description": "Joint MRI used for sports injuries, swelling, locking, and persistent knee pain.",
+    "keywords": ["knee pain", "sports injury", "swollen knee", "joint pain", "ligament injury", "meniscus tear"]
+  },
+  {
+    "key": "mri:mri-whole-body",
+    "description": "Comprehensive imaging option used for advanced screening and broad whole-body assessment.",
+    "keywords": ["full body checkup", "whole body scan", "comprehensive screening", "body check", "advanced screening"]
+  },
+  {
+    "key": "ct-scan:ct-hrct",
+    "description": "Detailed chest CT used for persistent cough, lung disease evaluation, and difficult respiratory cases.",
+    "keywords": ["persistent cough", "chest ct", "lung disease", "shortness of breath", "lung scan", "chronic cough"]
+  },
+  {
+    "key": "ct-scan:ct-brain",
+    "description": "Fast brain scan often recommended for head injury, sudden weakness, or emergency neurological symptoms.",
+    "keywords": ["head injury", "brain scan", "stroke", "sudden weakness", "loss of consciousness", "severe headache"]
+  },
+  {
+    "key": "ct-scan:ct-kub",
+    "description": "CT scan focused on the kidneys, ureters, and bladder for stone pain and urinary obstruction.",
+    "keywords": ["kidney stone", "flank pain", "urinary obstruction", "back pain", "blood in urine", "stone scan"]
+  },
+  {
+    "key": "ct-scan:ct-whole-body",
+    "description": "Broad imaging option for extensive screening and selected whole-body diagnostic workups.",
+    "keywords": ["full body checkup", "whole body ct", "body screening", "advanced checkup", "health screening"]
+  },
+  {
+    "key": "endoscopy:ogd",
+    "description": "Upper GI endoscopy used for persistent ulcer symptoms, reflux, heartburn, and upper abdominal pain.",
+    "keywords": ["stomach pain", "ulcer", "heartburn", "acid reflux", "vomiting blood", "upper abdominal pain", "indigestion"]
+  },
+  {
+    "key": "endoscopy:colonoscopy",
+    "description": "Colon examination used for rectal bleeding, bowel habit changes, and colorectal screening.",
+    "keywords": ["rectal bleeding", "blood in stool", "constipation", "colon check", "bowel changes", "screening colonoscopy"]
+  },
+  {
+    "key": "endoscopy:bronchoscopy",
+    "description": "Airway endoscopy used for stubborn cough, unexplained breathing symptoms, and lung evaluation.",
+    "keywords": ["persistent cough", "airway check", "breathing difficulty", "lung evaluation", "blood in sputum"]
+  },
+  {
+    "key": "cardiology-ecg:ecg-12",
+    "description": "Basic heart rhythm test often used for chest pain, palpitations, dizziness, and cardiac screening.",
+    "keywords": ["chest pain", "palpitations", "heart check", "dizziness", "irregular heartbeat", "cardiac test"]
+  },
+  {
+    "key": "cardiology-ecg:holter-24",
+    "description": "24-hour heart monitor used when palpitations or fainting happen on and off through the day.",
+    "keywords": ["palpitations", "fainting", "irregular heartbeat", "heart monitor", "24 hour ecg", "dizzy spells"]
+  },
+  {
+    "key": "cardiology-ecg:tte",
+    "description": "Cardiac ultrasound used to assess heart structure, pumping function, and selected chest symptoms.",
+    "keywords": ["echo", "heart scan", "shortness of breath", "chest discomfort", "heart function", "cardiac ultrasound"]
+  },
+  {
+    "key": "dna-testing:paternity-legal",
+    "description": "Court-admissible DNA testing for legal paternity confirmation and official documentation.",
+    "keywords": ["dna test", "paternity", "legal dna", "court admissible", "father test", "child father", "family dispute"]
+  },
+  {
+    "key": "dna-testing:immigration",
+    "description": "Embassy-ready DNA test used to support immigration and family relationship verification.",
+    "keywords": ["immigration dna", "embassy dna", "visa dna", "family verification", "travel documentation"]
+  },
+  {
+    "key": "dna-testing:ancestry",
+    "description": "Genetic testing used to explore family roots, ancestry background, and ethnicity insights.",
+    "keywords": ["ancestry", "ethnicity", "family roots", "origin", "genetic heritage", "dna background"]
+  },
+  {
+    "key": "cancer-screening:mammogram",
+    "description": "Breast cancer screening image commonly suggested for breast lumps, pain, or routine screening.",
+    "keywords": ["breast lump", "breast pain", "breast cancer screening", "mammogram", "breast check"]
+  },
+  {
+    "key": "cancer-screening:pap",
+    "description": "Cervical screening test used for routine women's health checks and abnormal discharge follow-up.",
+    "keywords": ["pap smear", "cervical screening", "abnormal discharge", "women health check", "hpv screening"]
+  },
+  {
+    "key": "cancer-screening:psa",
+    "description": "Prostate screening blood test often suggested for urinary symptoms and men's health checks.",
+    "keywords": ["prostate check", "urinary symptoms", "men health screening", "psa test", "frequent urination", "prostate screening"]
+  },
+  {
+    "key": "neurological:eeg",
+    "description": "Brain wave test commonly used for seizures, blackouts, sleep issues, and suspected epilepsy.",
+    "keywords": ["seizure", "epilepsy", "blackout", "brain wave", "loss of consciousness", "neurology test"]
+  },
+  {
+    "key": "neurological:sleep-study",
+    "description": "Overnight monitoring used for snoring, sleep apnea, and unexplained daytime sleepiness.",
+    "keywords": ["sleep apnea", "snoring", "poor sleep", "sleep test", "daytime sleepiness", "restless sleep"]
+  }
+]

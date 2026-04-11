@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useMetaTags } from '@/hooks/useMetaTags';
 import { motion, AnimatePresence } from 'motion/react';
 import type { ElementType, FormEvent } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import {
   LayoutDashboard, MessageCircle, Calendar,
   LogOut, Bell, Search, Trash2, CheckSquare, Square,
   CheckCircle, XCircle,
-  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock, UploadCloud, DownloadCloud,
+  Menu, X, Stethoscope, CalendarCheck, Filter, User, Phone, Mail, Clock,
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -17,7 +18,7 @@ import { ChatInterface } from '@/app/components/ChatInterface';
 import { supabase } from '@/app/lib/supabaseClient';
 import { insertChatMessage, uploadChatBlob, uploadChatFile } from '@/app/lib/chatService';
 import type { ChatMessage, ChatThread } from '@/app/lib/chatService';
-import { loadAnalytics, type DailyCount } from '@/app/lib/analyticsStore';
+import { loadAnalytics, type AnalyticsStore, type DailyCount } from '@/app/lib/analyticsStore';
 
 
 type AppointmentRecord = {
@@ -60,7 +61,7 @@ type AdminNotification = {
   };
 };
 
-const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgsnOwbpMeE0JQrY76UgyB7dmoD6z3P8_WrA&s';
+const LOGO_URL = '/brand/silhouette-logo-source.png';
 
 const statusColors: Record<string, string> = {
   confirmed: 'bg-green-100 text-green-700',
@@ -153,6 +154,7 @@ export function Admin() {
   });
 
   const [authed, setAuthed] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
   const ADMIN_EMAIL = 'admin@silhouette.com';
   const ADMIN_PIN_DEFAULT = '937388';
   const [adminPin, setAdminPin] = useState(ADMIN_PIN_DEFAULT);
@@ -185,7 +187,7 @@ export function Admin() {
   const [referralPartners, setReferralPartners] = useState<ReferralPartner[]>([]);
   const [activePartner, setActivePartner] = useState<ReferralPartner | null>(null);
   const [partnerReferralCount, setPartnerReferralCount] = useState(0);
-  const [analytics, setAnalytics] = useState({
+  const [analytics, setAnalytics] = useState<AnalyticsStore>({
     pageViews: [],
     testSelections: [],
     contactClicks: [],
@@ -197,11 +199,7 @@ export function Admin() {
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [selectedNotifications, setSelectedNotifications] = useState<string[]>([]);
   const [dataError, setDataError] = useState('');
-  const [publishing, setPublishing] = useState(false);
   const [pulling, setPulling] = useState(false);
-  const [hasPulled, setHasPulled] = useState(false);
-  const [pullToast, setPullToast] = useState(false);
-  const [publishToast, setPublishToast] = useState(false);
   const notificationCountsRef = useRef({
     appointments: 0,
     referrals: 0,
@@ -316,22 +314,40 @@ export function Admin() {
     setAnalytics(data);
   };
 
-  const handlePullUpdates = async () => {
+  const loadDashboardData = async () => {
     if (pulling) return;
     setPulling(true);
     setDataError('');
-    const threads = await fetchChats();
-    await Promise.all([fetchAppointments(), fetchReferrals(), fetchAnalytics()]);
-    await fetchLastMessages(threads);
-    await fetchSelectedMessages(selectedThread);
-    setHasPulled(true);
-    setPullToast(true);
-    window.setTimeout(() => setPullToast(false), 2500);
-    setPulling(false);
+    try {
+      const [threads, nextAppointments, nextReferrals] = await Promise.all([
+        fetchChats(),
+        fetchAppointments(),
+        fetchReferrals(),
+        fetchAnalytics(),
+      ]);
+      await fetchLastMessages(threads);
+
+      const nextSelectedThread = selectedChatId
+        ? threads.find((thread) => thread.ticket_id === selectedChatId) || null
+        : null;
+      await fetchSelectedMessages(nextSelectedThread);
+
+      if (!notificationsReadyRef.current) {
+        notificationCountsRef.current = {
+          appointments: nextAppointments.length,
+          referrals: nextReferrals.length,
+          chats: threads.length,
+          todaysAppointments: nextAppointments.filter((appt) => appt.date === today).length,
+        };
+        notificationsReadyRef.current = true;
+      }
+    } finally {
+      setPulling(false);
+    }
   };
 
   useEffect(() => {
-    void fetchAppointments();
+    if (!authed) return undefined;
     const channel = supabase
       .channel('admin-appointments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
@@ -341,16 +357,43 @@ export function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [authed]);
 
   useEffect(() => {
+    let active = true;
+
+    const applySession = (session: Session | null) => {
+      if (!active) return;
+      if (!session) {
+        notificationCountsRef.current = {
+          appointments: 0,
+          referrals: 0,
+          chats: 0,
+          todaysAppointments: 0,
+        };
+        notificationsReadyRef.current = false;
+      }
+      setAuthed(Boolean(session));
+      setAuthReady(true);
+    };
+
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        setAuthed(true);
-      }
+      applySession(data.session);
     };
+
     void checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(session);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -371,7 +414,7 @@ export function Admin() {
   }, []);
 
   useEffect(() => {
-    void fetchReferrals();
+    if (!authed) return undefined;
     const channel = supabase
       .channel('admin-referrals')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'referral_partners' }, () => {
@@ -381,10 +424,10 @@ export function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [authed]);
 
   useEffect(() => {
-    void fetchChats();
+    if (!authed) return undefined;
     const channel = supabase
       .channel('admin-chats')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'chats' }, () => {
@@ -394,9 +437,10 @@ export function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [authed]);
 
   useEffect(() => {
+    if (!authed) return undefined;
     void fetchLastMessages(chatThreads);
     const channel = supabase
       .channel('admin-chat-messages')
@@ -407,9 +451,10 @@ export function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [chatThreads]);
+  }, [authed, chatThreads]);
 
   useEffect(() => {
+    if (!authed) return undefined;
     void fetchSelectedMessages(selectedThread);
     if (!selectedThread) return undefined;
     const channel = supabase
@@ -426,18 +471,24 @@ export function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedThread]);
+  }, [authed, selectedThread]);
 
   useEffect(() => {
-    void fetchAnalytics();
+    if (!authed) return undefined;
     const handleFocus = () => void fetchAnalytics();
     window.addEventListener('focus', handleFocus);
     return () => {
       window.removeEventListener('focus', handleFocus);
     };
-  }, []);
+  }, [authed]);
 
   useEffect(() => {
+    if (!authed) return;
+    void loadDashboardData();
+  }, [authed]);
+
+  useEffect(() => {
+    if (!authed || pulling) return;
     if (!notificationsReadyRef.current) {
       notificationCountsRef.current = {
         appointments: appointments.length,
@@ -811,23 +862,7 @@ export function Admin() {
     }
     setAuthError(false);
     setAuthed(true);
-  };
-
-  const handlePublish = async () => {
-    if (publishing) return;
-    setPublishing(true);
-    const now = new Date().toISOString();
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({ key: 'release_version', value: now, updated_at: now }, { onConflict: 'key' });
-    if (error) {
-      setDataError(`Publish failed: ${error.message}`);
-    } else {
-      setPublishToast(true);
-      window.setTimeout(() => setPublishToast(false), 3000);
-      setHasPulled(false);
-    }
-    setPublishing(false);
+    setAuthReady(true);
   };
 
   const updateAppointmentStatus = (id: string, status: AppointmentRecord['status']) => {
@@ -852,6 +887,17 @@ export function Admin() {
     if (items.length === 0) return;
     setNotifications((prev) => [...items, ...prev]);
   };
+
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-950 to-indigo-900 flex items-center justify-center p-4">
+        <div className="rounded-3xl bg-white px-8 py-6 text-center shadow-2xl">
+          <div className="text-lg font-semibold text-gray-900">Restoring admin session...</div>
+          <div className="mt-2 text-sm text-gray-500">Connecting to Supabase.</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!authed) {
     return (
@@ -896,16 +942,6 @@ export function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
-      {publishToast && (
-        <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
-          Update published. Users will refresh automatically.
-        </div>
-      )}
-      {pullToast && (
-        <div className="fixed top-20 right-6 z-50 bg-blue-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg">
-          Pulled latest data from Supabase.
-        </div>
-      )}
       {/* Mobile Backdrop Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -1002,16 +1038,6 @@ export function Admin() {
                 className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
               />
             </div>
-            <button
-              onClick={hasPulled ? handlePublish : handlePullUpdates}
-              disabled={publishing || pulling}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-blue-100 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-60"
-            >
-              {hasPulled ? <UploadCloud className="w-4 h-4" /> : <DownloadCloud className="w-4 h-4" />}
-              {hasPulled
-                ? (publishing ? 'Publishing...' : 'Publish Update')
-                : (pulling ? 'Pulling...' : 'Pull Updates')}
-            </button>
             <div className="relative">
               <button
                 aria-label="Open notifications"
@@ -1118,6 +1144,11 @@ export function Admin() {
         </div>
 
         <div className="p-4 sm:p-6 flex-1">
+          {dataError && (
+            <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {dataError}
+            </div>
+          )}
           <AnimatePresence mode="wait">
             {/* OVERVIEW */}
             {section === 'overview' && (

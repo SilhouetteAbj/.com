@@ -12,25 +12,25 @@ const facilities: FacilityImage[] = [
   {
     title: 'CT Scanner',
     desc: 'High-resolution CT scanner for advanced imaging',
-    src: 'https://ebv2e3r5onu.exactdn.com/wp-content/uploads/2020/06/ct-scanner-cropped-1024x768.jpg?strip=all',
+    src: '/images/home/facility-ct.jpg',
     alt: 'CT Scanner'
   },
   {
     title: 'Ultrasound Lab',
     desc: 'Modern ultrasound lab with advanced equipment',
-    src: 'https://static.wixstatic.com/media/e1a4cd_09474dbb981041ce9c17b32ecb2cda2a~mv2.jpg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/e1a4cd_09474dbb981041ce9c17b32ecb2cda2a~mv2.jpg',
+    src: '/images/shared/ultrasound-lab.jpg',
     alt: 'Ultrasound Lab'
   },
   {
     title: 'EEG Room',
     desc: 'Electroencephalogram (EEG) for brain activity monitoring',
-    src: 'https://i0.wp.com/cdn-prod.medicalnewstoday.com/content/images/articles/325/325191/an-electroencephalogram-or-eeg-being-performed-image-credit-baburov-2009.jpg?w=1155&h=1541',
+    src: '/images/home/facility-eeg.jpg',
     alt: 'EEG Room'
   },
   {
     title: 'Mammogram Suite',
     desc: 'Upgraded Hologic Genius 3D mammogram machines',
-    src: 'https://boone.health/wp-content/uploads/2024/11/Boone-Health-completes-upgrade-to-Hologic-Genius-3Dimensions-mammogram-machines-across-all-locations--scaled.jpg',
+    src: '/images/home/facility-mammogram.jpg',
     alt: 'Mammogram Suite'
   },
 ];

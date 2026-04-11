@@ -6,7 +6,7 @@ const services = [
     description: 'Detailed examination of the large intestine and colon for polyps, cancer screening.',
     duration: '30–60 min',
     badge: 'Cancer Screening',
-    imageUrl: 'https://cdn.medicalpark.com.tr/colonoscopy.jpg',
+    imageUrl: '/images/shared/colonoscopy-service.jpg',
   },
 ];
 

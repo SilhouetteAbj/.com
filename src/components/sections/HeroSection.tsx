@@ -1,165 +1,482 @@
-import { useState } from 'react';
-import { Link } from 'react-router';
-import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, MessageCircle, ArrowRight } from 'lucide-react';
+import { useDeferredValue, useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router';
+import { AnimatePresence, motion } from 'motion/react';
+import { ArrowRight, Microscope, Search, ShieldCheck, Sparkles, Stethoscope } from 'lucide-react';
 
-const MRI_IMG = 'https://images.unsplash.com/photo-1587010580103-fd86b8ea14ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBNUkklMjBzY2FubmVyJTIwaG9zcGl0YWwlMjBtZWRpY2FsJTIwaW1hZ2luZ3xlbnwxfHx8fDE3NzI3MDE1Mzl8MA&ixlib=rb-4.1.0&q=80&w=1080';
-const DNA_IMG = 'https://images.unsplash.com/photo-1655210913810-33acfa96d1e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxETkElMjBoZWxpeCUyMGdlbmV0aWNzJTIwdGVzdGluZyUyMGxhYm9yYXRvcnl8ZW58MXx8fHwxNzcyNzAxNTQxfDA&ixlib=rb-4.1.0&q=80&w=1080';
+import { TOTAL_CATEGORIES, TOTAL_TESTS } from '@/app/data/servicesData';
+import {
+  HEALTH_DISCOUNT_HEADLINE,
+  HEALTH_DISCOUNT_NOTE,
+} from '@/app/data/discountPromotion';
+import {
+  DISCOVERY_QUICK_TAGS,
+  FEATURED_DISCOVERY_RESULTS,
+  searchDiscoveryTests,
+} from '@/app/lib/serviceDiscovery';
+import { cn } from '@/lib/utils';
 
-const stats = [
-  { value: '15,000+', label: 'Patients Served' },
-  { value: '50+', label: 'Expert Specialists' },
-  { value: '99.2%', label: 'Accuracy Rate' },
-  { value: '24h', label: 'Result Turnaround' },
+const HERO_BG = '/images/home/hero-bg.jpg';
+
+const HERO_BREATHE_DELAY_CLASSES = [
+  'hero-breathe-delay-1',
+  'hero-breathe-delay-2',
+  'hero-breathe-delay-3',
+  'hero-breathe-delay-4',
+] as const;
+
+const heroStats = [
+  {
+    value: `${TOTAL_TESTS}+`,
+    label: 'Tests Indexed',
+    icon: Microscope,
+    cardClass:
+      'border-cyan-300/20 bg-[linear-gradient(145deg,rgba(34,211,238,0.22)_0%,rgba(14,165,233,0.12)_48%,rgba(15,23,42,0.64)_100%)] shadow-[0_22px_58px_rgba(6,182,212,0.14)]',
+    iconClass: 'bg-cyan-300/18 text-cyan-100',
+  },
+  {
+    value: `${TOTAL_CATEGORIES}`,
+    label: 'Specialty Tracks',
+    icon: Stethoscope,
+    cardClass:
+      'border-emerald-300/20 bg-[linear-gradient(145deg,rgba(52,211,153,0.24)_0%,rgba(16,185,129,0.12)_48%,rgba(15,23,42,0.64)_100%)] shadow-[0_22px_58px_rgba(16,185,129,0.14)]',
+    iconClass: 'bg-emerald-300/18 text-emerald-100',
+  },
+  {
+    value: '24-48hr',
+    label: 'Typical Reports',
+    icon: Sparkles,
+    cardClass:
+      'border-fuchsia-300/20 bg-[linear-gradient(145deg,rgba(244,114,182,0.22)_0%,rgba(168,85,247,0.12)_48%,rgba(15,23,42,0.64)_100%)] shadow-[0_22px_58px_rgba(217,70,239,0.14)]',
+    iconClass: 'bg-fuchsia-300/18 text-fuchsia-100',
+  },
+  {
+    value: 'Clinician Led',
+    label: 'Final Review',
+    icon: ShieldCheck,
+    cardClass:
+      'border-amber-300/20 bg-[linear-gradient(145deg,rgba(251,191,36,0.24)_0%,rgba(249,115,22,0.12)_48%,rgba(15,23,42,0.64)_100%)] shadow-[0_22px_58px_rgba(251,146,60,0.14)]',
+    iconClass: 'bg-amber-300/18 text-amber-100',
+  },
 ];
 
-type Mode = 'medical' | 'dna';
-
-function ChatWithSupportButton({ mode }: { mode: Mode }) {
-  return (
-    <Link
-      to="/support"
-      className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white/10 backdrop-blur-sm border border-white/30 text-white font-semibold rounded-xl hover:bg-white/20 transition-all duration-200"
-    >
-      <MessageCircle className="w-5 h-5" />
-      {mode === 'medical' ? 'Chat With Support' : 'Chat with DNA Specialist'}
-    </Link>
-  );
-}
-
 export function HeroSection() {
-  const [mode, setMode] = useState<Mode>('medical');
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [isSearchActive, setIsSearchActive] = useState(false);
+  const [isHeroMotionPaused, setIsHeroMotionPaused] = useState(false);
+  const searchHubRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const pauseTimerRef = useRef<number | null>(null);
+  const deferredQuery = useDeferredValue(query);
+  const trimmedQuery = deferredQuery.trim();
+  const hasSearchQuery = trimmedQuery.length >= 2;
+  const results = hasSearchQuery
+    ? searchDiscoveryTests(trimmedQuery, 6)
+    : FEATURED_DISCOVERY_RESULTS;
+  const showResults = isSearchActive || hasSearchQuery;
+  const heroAnimationPaused = isHeroMotionPaused;
+
+  useEffect(() => {
+    return () => {
+      if (pauseTimerRef.current) {
+        window.clearTimeout(pauseTimerRef.current);
+      }
+    };
+  }, []);
+
+  const pauseHeroAnimation = () => {
+    setIsHeroMotionPaused(true);
+
+    if (pauseTimerRef.current) {
+      window.clearTimeout(pauseTimerRef.current);
+    }
+
+    pauseTimerRef.current = window.setTimeout(() => {
+      setIsHeroMotionPaused(false);
+      pauseTimerRef.current = null;
+    }, 700);
+  };
+
+  const focusSearch = () => {
+    setIsSearchActive(true);
+    pauseHeroAnimation();
+    inputRef.current?.focus();
+
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      searchHubRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    }
+  };
+
+  const runPrimarySearch = (value: string) => {
+    if (value.trim().length < 2) {
+      focusSearch();
+      return;
+    }
+
+    const bestMatch = searchDiscoveryTests(value, 1)[0];
+
+    if (bestMatch) {
+      navigate(bestMatch.route);
+      return;
+    }
+
+    focusSearch();
+  };
 
   return (
-    <>
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background */}
-        <div className="absolute inset-0">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={mode}
-              src={mode === 'medical' ? MRI_IMG : DNA_IMG}
-              alt="hero"
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8 }}
-              className="w-full h-full object-cover"
-            />
-          </AnimatePresence>
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-950/90 via-blue-900/70 to-blue-800/40" />
-          {/* Animated grid overlay */}
-          <div className="absolute inset-0 opacity-10 grid-overlay" />
-        </div>
+    <section
+      className="relative isolate min-h-[100svh] overflow-hidden bg-[#020817] text-white"
+      data-hero-paused={heroAnimationPaused ? 'true' : 'false'}
+    >
+      <div className="absolute inset-0">
+        <img
+          src={HERO_BG}
+          alt=""
+          className="h-full w-full object-cover opacity-[0.14]"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.24),_transparent_38%),linear-gradient(180deg,_rgba(2,8,23,0.7)_0%,_rgba(2,8,23,0.92)_42%,_rgba(2,8,23,1)_100%)]" />
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
+            backgroundSize: '120px 120px',
+          }}
+        />
 
-        {/* Floating particles */}
-        {[...Array(6)].map((_, i) => (
+        <motion.div
+          className="absolute left-1/2 top-28 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-400/25 blur-[110px]"
+          animate={{ opacity: [0.22, 0.38, 0.22], scale: [1, 1.08, 1] }}
+          transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-[-5%] h-80 w-80 rounded-full bg-emerald-400/20 blur-[120px]"
+          animate={{ opacity: [0.18, 0.3, 0.18], scale: [1, 1.12, 1] }}
+          transition={{ duration: 8.5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
+        />
+        <motion.div
+          className="absolute bottom-24 left-[-8%] h-72 w-72 rounded-full bg-blue-500/20 blur-[115px]"
+          animate={{ opacity: [0.14, 0.28, 0.14], scale: [1, 1.1, 1] }}
+          transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: 1.2 }}
+        />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-7xl items-center px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+        <div className="w-full">
           <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-cyan-400/40 rounded-full"
-            style={{ left: `${15 + i * 15}%`, top: `${20 + (i % 3) * 20}%` }}
-            animate={{ y: [0, -20, 0], opacity: [0.3, 0.8, 0.3] }}
-            transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.4 }}
-          />
-        ))}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+            className="mx-auto max-w-3xl text-center"
+          >
+            <span className="inline-flex items-center justify-center rounded-full border border-cyan-400/30 bg-cyan-400/[0.12] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-cyan-200">
+              Service Discovery Hub
+            </span>
+            <h1 className="mt-6 text-4xl font-semibold leading-tight text-white sm:text-5xl lg:text-6xl">
+              Search by symptom.
+              <span className="block bg-gradient-to-r from-cyan-300 via-sky-300 to-emerald-300 bg-clip-text text-transparent">
+                Land on the right diagnostic test.
+              </span>
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+              Describe what you feel in plain language and we will surface the closest tests from our local catalog, including pregnancy scans, malaria screening, imaging, and DNA services.
+            </p>
+          </motion.div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 w-full">
-          <div className="flex flex-col items-center text-center">
-            {/* Mode Toggle - Centered */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex bg-white/10 backdrop-blur-sm rounded-2xl p-1 mb-8 border border-white/20"
-            >
-              {(['medical', 'dna'] as const).map((m) => (
+          <motion.div
+            ref={searchHubRef}
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.12 }}
+            onFocusCapture={() => {
+              setIsSearchActive(true);
+              pauseHeroAnimation();
+            }}
+            onBlurCapture={() => {
+              if (pauseTimerRef.current) {
+                window.clearTimeout(pauseTimerRef.current);
+                pauseTimerRef.current = null;
+              }
+              setIsHeroMotionPaused(false);
+              window.setTimeout(() => {
+                if (!searchHubRef.current?.contains(document.activeElement)) {
+                  setIsSearchActive(false);
+                }
+              }, 0);
+            }}
+            className="mx-auto mt-14 w-full max-w-[820px] sm:mt-16"
+          >
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <label className="relative block flex-1">
+                <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    pauseHeroAnimation();
+                  }}
+                  onFocus={focusSearch}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter') {
+                      event.preventDefault();
+                      runPrimarySearch(event.currentTarget.value);
+                    }
+
+                    if (event.key === 'Escape') {
+                      setQuery('');
+                      setIsSearchActive(false);
+                      setIsHeroMotionPaused(false);
+                    }
+                  }}
+                  placeholder="Describe how you feel (e.g., 'back pain' or 'malaria symptoms')..."
+                  className="h-16 w-full rounded-2xl border border-white/14 bg-slate-950/[0.84] pl-14 pr-5 text-base text-white shadow-[0_20px_48px_rgba(2,8,23,0.38)] outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-300/50 focus:ring-4 focus:ring-cyan-400/[0.12]"
+                />
+              </label>
+
+              <div className="hero-breathe hero-breathe-delay-1 w-full sm:w-auto">
                 <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                    mode === m
-                      ? 'bg-white text-blue-900 shadow-lg'
-                      : 'text-white hover:bg-white/10'
-                  }`}
+                  type="button"
+                  onClick={() => runPrimarySearch(query)}
+                  className="inline-flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-sky-300 via-cyan-300 to-emerald-300 px-6 text-base font-semibold text-slate-950 shadow-[0_18px_45px_rgba(56,189,248,0.28)] transition duration-200 hover:shadow-[0_24px_55px_rgba(16,185,129,0.26)] sm:min-w-[148px]"
                 >
-                  {m === 'medical' ? '🏥 Medical Diagnostics' : '🧬 DNA Testing'}
+                  Search
+                  <ArrowRight className="h-4 w-4" />
                 </button>
-              ))}
-            </motion.div>
+              </div>
+            </div>
 
-            <AnimatePresence mode="wait">
+            <div className="mt-6">
+              <div className="hero-breathe hero-breathe-delay-2">
+                <div className="rounded-[24px] border border-emerald-200/28 bg-[linear-gradient(145deg,rgba(34,197,94,0.2)_0%,rgba(56,189,248,0.16)_44%,rgba(14,165,233,0.18)_100%)] px-4 py-4 text-center shadow-[0_18px_40px_rgba(16,185,129,0.16)] backdrop-blur-xl">
+                  <div className="inline-flex items-center justify-center rounded-full border border-white/16 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-50">
+                    Online Booking Bonus
+                  </div>
+                  <div className="mt-3 text-sm font-semibold text-white sm:text-base">
+                    {HEALTH_DISCOUNT_HEADLINE}
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-cyan-50/90 sm:text-sm">
+                    {HEALTH_DISCOUNT_NOTE}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-center text-xs font-medium uppercase tracking-[0.24em] text-slate-500">
+                Quick Tags
+              </div>
+
+              <div className="mt-3 hidden flex-wrap items-center justify-center gap-3 sm:flex">
+                {DISCOVERY_QUICK_TAGS.map((tag, index) => {
+                  const isActive = query.trim().toLowerCase() === tag.query.toLowerCase();
+
+                  return (
+                    <button
+                      key={tag.label}
+                      type="button"
+                      onClick={() => {
+                        setQuery(tag.query);
+                        focusSearch();
+                      }}
+                      className={cn(
+                        'hero-breathe min-h-12 rounded-full border px-4 py-2 text-sm font-medium transition duration-200',
+                        HERO_BREATHE_DELAY_CLASSES[index % HERO_BREATHE_DELAY_CLASSES.length],
+                        isActive
+                          ? 'border-cyan-300/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.2),rgba(16,185,129,0.18))] text-cyan-50'
+                          : 'border-white/10 bg-white/[0.05] text-slate-200 hover:border-cyan-300/30 hover:bg-cyan-300/[0.08]',
+                      )}
+                    >
+                      {tag.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                className="mt-3 -mx-4 overflow-x-auto px-4 pb-1 sm:hidden [&::-webkit-scrollbar]:hidden"
+                style={{ scrollbarWidth: 'none' }}
+              >
+                <div className="flex w-max items-center gap-3 pr-4">
+                  {DISCOVERY_QUICK_TAGS.map((tag, index) => {
+                    const isActive = query.trim().toLowerCase() === tag.query.toLowerCase();
+
+                    return (
+                      <button
+                        key={tag.label}
+                        type="button"
+                        onClick={() => {
+                          setQuery(tag.query);
+                          focusSearch();
+                        }}
+                        className={cn(
+                          'hero-breathe min-h-12 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition duration-200',
+                          HERO_BREATHE_DELAY_CLASSES[index % HERO_BREATHE_DELAY_CLASSES.length],
+                          isActive
+                            ? 'border-cyan-300/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.2),rgba(16,185,129,0.18))] text-cyan-50'
+                            : 'border-white/10 bg-white/[0.05] text-slate-200',
+                        )}
+                      >
+                        {tag.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {showResults && (
+                <motion.div
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.22 }}
+                  className="mt-6 overflow-hidden rounded-[28px] border border-white/10 bg-slate-950/[0.78] shadow-[0_30px_90px_rgba(2,8,23,0.48)] backdrop-blur-xl"
+                >
+                  <div className="border-b border-white/[0.08] px-4 py-4 sm:px-5">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                          {hasSearchQuery ? 'Suggested Tests' : 'Popular Starting Points'}
+                        </div>
+                        <h2 className="mt-2 text-lg font-semibold text-white sm:text-xl">
+                          {hasSearchQuery
+                            ? `Matches for "${trimmedQuery}"`
+                            : 'Start with one of these commonly requested tests'}
+                        </h2>
+                      </div>
+                      <div className="text-sm text-slate-400">
+                        {results.length} {results.length === 1 ? 'result' : 'results'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="max-h-[58vh] overflow-y-auto overscroll-contain px-4 py-4 sm:max-h-[56vh] sm:px-5 sm:py-5"
+                    style={{ WebkitOverflowScrolling: 'touch' }}
+                  >
+                    {results.length > 0 ? (
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {results.map((result, index) => (
+                          <motion.div
+                            key={result.key}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.04 }}
+                          >
+                            <Link
+                              to={result.route}
+                              className={cn(
+                                'hero-breathe group flex h-full flex-col rounded-[24px] border border-white/10 bg-white/[0.04] p-4 transition duration-200 hover:border-cyan-300/30 hover:bg-cyan-300/[0.07] hover:shadow-[0_24px_55px_rgba(34,211,238,0.12)]',
+                                HERO_BREATHE_DELAY_CLASSES[index % HERO_BREATHE_DELAY_CLASSES.length],
+                              )}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <span
+                                  className="inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]"
+                                  style={{
+                                    borderColor: `${result.accentColor}66`,
+                                    color: result.accentColor,
+                                    backgroundColor: `${result.accentColor}14`,
+                                  }}
+                                >
+                                  {result.categoryTitle}
+                                </span>
+                                {result.popular && (
+                                  <span className="text-xs font-medium text-cyan-200">
+                                    Popular
+                                  </span>
+                                )}
+                              </div>
+
+                              <h3 className="mt-4 text-base font-semibold text-white sm:text-lg">
+                                {result.name}
+                              </h3>
+                              <p className="mt-2 text-sm leading-6 text-slate-300">
+                                {result.description}
+                              </p>
+
+                              <div className="mt-5 flex items-center justify-between gap-3">
+                                <span className="text-xs text-slate-500">
+                                  Local keyword and fuzzy match
+                                </span>
+                                <span className="inline-flex h-11 items-center gap-2 rounded-2xl border border-cyan-300/25 bg-cyan-300/10 px-4 text-sm font-semibold text-cyan-100 transition duration-200 group-hover:border-emerald-300/30 group-hover:bg-emerald-300/[0.12] group-hover:text-emerald-100">
+                                  View Details
+                                  <ArrowRight className="h-4 w-4" />
+                                </span>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="hero-breathe hero-breathe-delay-3 rounded-[24px] border border-dashed border-white/10 bg-white/[0.03] px-4 py-6 text-center">
+                        <div className="text-base font-semibold text-white">
+                          No close matches yet
+                        </div>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                          Try terms like &quot;pregnancy check&quot;, &quot;persistent cough&quot;, or &quot;lower back pain&quot;.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="hero-breathe hero-breathe-delay-4 mt-4 rounded-2xl border border-emerald-300/20 bg-emerald-300/10 px-4 py-3 text-sm leading-6 text-emerald-50">
+                      This tool provides suggestions based on common medical data. Please consult our professionals for a final diagnosis.
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.22 }}
+            className="mx-auto mt-8 flex max-w-[820px] items-center justify-center"
+          >
+            <Link
+              to="/services"
+              className="hero-breathe hero-breathe-delay-1 inline-flex items-center gap-2 rounded-full border border-cyan-200/20 bg-[linear-gradient(135deg,rgba(56,189,248,0.18),rgba(16,185,129,0.14))] px-5 py-3 font-medium text-white shadow-[0_18px_40px_rgba(34,211,238,0.12)] transition duration-200 hover:border-cyan-300/30 hover:shadow-[0_22px_48px_rgba(16,185,129,0.16)]"
+            >
+              Browse all services
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+
+          <div className="mx-auto mt-10 grid max-w-[980px] grid-cols-2 gap-3 lg:grid-cols-4">
+            {heroStats.map(({ value, label, icon: Icon, cardClass, iconClass }, index) => (
               <motion.div
-                key={mode}
+                key={label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="flex flex-col items-center"
+                transition={{ duration: 0.45, delay: 0.28 + index * 0.08 }}
+                className="h-full"
               >
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 max-w-2xl">
-                  {mode === 'medical' ? (
-                    <>Advanced Diagnostic<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Imaging & Lab</span><br />Services You Can Trust</>
-                  ) : (
-                    <>Accurate &<br /><span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Confidential</span><br />DNA Testing</>
+                <div
+                  className={cn(
+                    'hero-breathe h-full rounded-[24px] border p-4 backdrop-blur-xl',
+                    HERO_BREATHE_DELAY_CLASSES[index % HERO_BREATHE_DELAY_CLASSES.length],
+                    cardClass,
                   )}
-                </h1>
-
-                <p className="text-blue-100 text-lg mb-8 leading-relaxed max-w-xl">
-                  {mode === 'medical'
-                    ? 'State-of-the-art diagnostic equipment, certified specialists, and fast results — all in one modern facility designed for your health.'
-                    : 'Paternity, immigration, and family DNA testing with laboratory-certified accuracy and complete confidentiality guaranteed.'}
-                </p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Stats bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-md border-t border-white/20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {stats.map((s, i) => (
-                <motion.div
-                  key={s.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + i * 0.1 }}
-                  className="text-center"
                 >
-                  <div className="text-2xl font-bold text-white">{s.value}</div>
-                  <div className="text-blue-200 text-xs">{s.label}</div>
-                </motion.div>
-              ))}
-            </div>
+                  <div className={cn('flex h-11 w-11 items-center justify-center rounded-2xl', iconClass)}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="mt-4 text-2xl font-semibold text-white sm:text-[1.75rem]">
+                    {value}
+                  </div>
+                  <div className="mt-1 text-sm text-slate-400">{label}</div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </section>
-
-      {/* Buttons Section - Below Hero */}
-      <AnimatePresence mode="wait">
-        <motion.section
-          key={mode}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-b from-blue-900 to-blue-800 py-12 px-4 sm:px-6 lg:px-8"
-        >
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/booking" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold rounded-xl shadow-xl shadow-blue-500/30 hover:shadow-cyan-500/40 hover:scale-105 transition-all duration-200">
-                <Calendar className="w-5 h-5" />
-                {mode === 'medical' ? 'Book Appointment' : 'Book DNA Test'}
-              </Link>
-              <ChatWithSupportButton mode={mode} />
-              <Link to="/services" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-white text-blue-900 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-200">
-                View Services
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </motion.section>
-      </AnimatePresence>
-    </>
+      </div>
+    </section>
   );
 }

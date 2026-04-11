@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { Star, ArrowRight } from 'lucide-react';
 import { FadeInSection } from './FadeInSection';
 
-const TEAM_IMG = 'https://kingzypharma.com/wp-content/uploads/2025/01/african-american-woman-scientist-holding-test-tube-laboratory-1024x640.jpg';
+const TEAM_IMG = '/images/home/why-choose-team.jpg';
 
 const whyUs = [
   { icon: Shield, title: 'ISO Certified', desc: 'Internationally accredited diagnostic standards', color: 'text-blue-600 bg-blue-50' },

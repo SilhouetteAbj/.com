@@ -6,8 +6,8 @@ import type { ReactNode } from 'react';
 import { Shield, Award, Clock, CheckCircle, Calendar, MessageCircle, ArrowRight, Lock, Dna } from 'lucide-react';
 import { trackContactClick } from '@/app/lib/analyticsStore';
 
-const DNA_IMG = 'https://images.unsplash.com/photo-1655210913810-33acfa96d1e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxETkElMjBoZWxpeCUyMGdlbmV0aWNzJTIwdGVzdGluZyUyMGxhYm9yYXRvcnl8ZW58MXx8fHwxNzcyNzAxNTQxfDA&ixlib=rb-4.1.0&q=80&w=1080';
-const LAB_IMG = 'https://images.unsplash.com/photo-1578496479530-799fd6d0803a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtZWRpY2FsJTIwZGlhZ25vc3RpYyUyMGxhYm9yYXRvcnklMjBkb2N0b3J8ZW58MXx8fHwxNzcyNzAxNTQwfDA&ixlib=rb-4.1.0&q=80&w=1080';
+const DNA_IMG = '/images/pages/dna-hero.jpg';
+const LAB_IMG = '/images/shared/lab-diagnostics.jpg';
 
 const dnaServices = [
   {

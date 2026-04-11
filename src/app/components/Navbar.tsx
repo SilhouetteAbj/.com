@@ -5,7 +5,7 @@ import { Menu, X, Phone, ChevronDown } from 'lucide-react';
 import { SERVICE_CATEGORIES } from '@/app/data/servicesData';
 import { trackContactClick } from '@/app/lib/analyticsStore';
 
-const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgsnOwbpMeE0JQrY76UgyB7dmoD6z3P8_WrA&s';
+const LOGO_URL = '/brand/silhouette-logo-source.png';
 
 const serviceDropdown = SERVICE_CATEGORIES.map((c) => ({
   label: c.title,
@@ -172,14 +172,14 @@ export function Navbar() {
               <span>+2349030002653</span>
             </a>
             <a
-              href="tel:+2348101196774"
+              href="tel:+2349071920849"
               onClick={() => trackContactClick('call')}
               className={`flex items-center gap-2 text-sm font-medium transition-colors duration-200 ${
                 scrolled ? 'text-blue-700' : 'text-blue-100 hover:text-white'
               }`}
             >
               <Phone className="w-4 h-4" />
-              <span>+2348101196774</span>
+              <span>+2349071920849</span>
             </a>
             <Link
               to="/booking"

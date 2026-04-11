@@ -12,7 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 // Health check
 export const checkSupabaseConnection = async () => {
   try {
-    await supabase.from('bookings').select('count()');
+    await supabase.from('appointments').select('id').limit(1);
     return true;
   } catch (error) {
     console.error('Supabase connection failed:', error);

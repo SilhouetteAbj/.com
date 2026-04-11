@@ -14,6 +14,7 @@ export function FloatingActions() {
   const [canInstall, setCanInstall] = useState(false);
   const [showIosInstall, setShowIosInstall] = useState(false);
   const [iosInstallOpen, setIosInstallOpen] = useState(false);
+  const [educationalModalOpen, setEducationalModalOpen] = useState(false);
 
   useEffect(() => {
     const handlePrompt = (event: Event) => {
@@ -41,6 +42,24 @@ export function FloatingActions() {
     setShowIosInstall(isSafari && !isStandalone);
   }, []);
 
+  useEffect(() => {
+    const syncEducationalModalState = () => {
+      setEducationalModalOpen(
+        document.body.getAttribute('data-educational-modal-open') === 'true'
+      );
+    };
+
+    syncEducationalModalState();
+
+    const observer = new MutationObserver(syncEducationalModalState);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-educational-modal-open'],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   const handleInstall = async () => {
     if (!installPrompt) return;
     await installPrompt.prompt();
@@ -52,6 +71,10 @@ export function FloatingActions() {
   const whatsappMessage = encodeURIComponent(
     'Hello! I would like to speak with customer support.'
   );
+
+  if (educationalModalOpen) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-24 right-6 flex flex-col gap-3 z-50">
@@ -92,7 +115,7 @@ export function FloatingActions() {
         className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border border-emerald-100"
       >
         <img
-          src="https://store-images.s-microsoft.com/image/apps.8453.13655054093851568.4a371b72-2ce8-4bdb-9d83-be49894d3fa0.7f3687b9-847d-4f86-bb5c-c73259e2b38e"
+          src="/images/ui/whatsapp-icon.png"
           alt="WhatsApp"
           className="w-full h-full object-cover"
           loading="lazy"
@@ -107,7 +130,7 @@ export function FloatingActions() {
           className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border border-sky-100"
         >
           <img
-            src="https://media.istockphoto.com/id/1494206458/vector/calling-icon-call-icon-telephone-reception-vector.jpg?s=612x612&w=0&k=20&c=0FuOg7NoZvfwM5LG2vDUjo_m-7EoNlKQWGfYiJ5GeG4="
+            src="/images/ui/call-icon.jpg"
             alt="Call"
             className="w-full h-full object-cover"
             loading="lazy"
@@ -123,11 +146,11 @@ export function FloatingActions() {
               +2349030002653
             </a>
             <a
-              href="tel:+2348101196774"
+              href="tel:+2349071920849"
               onClick={() => trackContactClick('call')}
               className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
             >
-              +2348101196774
+              +2349071920849
             </a>
           </div>
         )}
@@ -140,7 +163,7 @@ export function FloatingActions() {
         className="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 border border-violet-100"
       >
         <img
-          src="https://www.shutterstock.com/image-vector/support-icon-can-be-used-600nw-1887496465.jpg"
+          src="/images/ui/support-icon.jpg"
           alt="Support chat"
           className="w-full h-full object-cover"
           loading="lazy"

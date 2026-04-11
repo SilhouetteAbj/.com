@@ -45,4 +45,37 @@
 	.heartbeat {
 		animation: heartbeat 0.7s cubic-bezier(0.4, 0, 0.6, 1) 1;
 	}
+
+	@keyframes hero-heartbeat {
+		0%, 100% {
+			transform: scale(1);
+		}
+		16% {
+			transform: scale(1.025);
+		}
+		30% {
+			transform: scale(0.985);
+		}
+		44% {
+			transform: scale(1.014);
+		}
+		58% {
+			transform: scale(0.995);
+		}
+	}
+
+	.hero-breathe {
+		animation: hero-heartbeat 4.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+		transform-origin: center;
+		will-change: transform;
+	}
+
+	.hero-breathe-delay-1 { animation-delay: 0.3s; }
+	.hero-breathe-delay-2 { animation-delay: 0.9s; }
+	.hero-breathe-delay-3 { animation-delay: 1.5s; }
+	.hero-breathe-delay-4 { animation-delay: 2.1s; }
+
+	[data-hero-paused='true'] .hero-breathe {
+		animation-play-state: paused;
+	}
 }

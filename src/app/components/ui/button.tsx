@@ -51,16 +51,16 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot : "button";
+  const Comp = (asChild ? Slot : "button") as React.ElementType;
   // Add breathe animation to all primary/CTA buttons
   const isPrimary = !variant || variant === "default";
   const breatheClass = isPrimary ? `breathe ${getBreatheDelayClass()}` : "";
 
   // Heartbeat on hover for primary/CTA
   const [isHeartbeat, setHeartbeat] = React.useState(false);
-  const handleMouseEnter = (e: React.MouseEvent) => {
+  const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (isPrimary) setHeartbeat(true);
-    if (props.onMouseEnter) props.onMouseEnter(e);
+    props.onMouseEnter?.(e);
   };
   const handleAnimationEnd = () => setHeartbeat(false);
 
@@ -68,7 +68,7 @@ function Button({
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }), breatheClass, isHeartbeat && "heartbeat")}
-      onMouseEnter={handleMouseEnter}
+      onMouseEnter={handleMouseEnter as React.MouseEventHandler<HTMLElement>}
       onAnimationEnd={handleAnimationEnd}
       {...props}
     />

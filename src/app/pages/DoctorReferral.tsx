@@ -10,21 +10,21 @@ const SLIDES = [
     desc: 'Refer your patients to Silhouette Diagnostics and unlock professional rewards, priority reporting, and direct specialist support.',
     cta: 'Next',
     image:
-      'https://images.unsplash.com/photo-1762237798212-bcc000c00891?q=80&w=386&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      '/images/referral/slide-1.jpg',
   },
   {
     title: 'Track Every Referral',
     desc: 'Your referrals are logged with clear status updates. Patients get fast scheduling and reports within 24-48 hours.',
     cta: 'Next',
     image:
-      'https://images.unsplash.com/photo-1770836037622-11643462bc1d?q=80&w=387&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      '/images/referral/slide-2.jpg',
   },
   {
     title: 'Start Referring Patients',
     desc: 'Launch your referral onboarding and activate your professional partnership in minutes.',
     cta: 'Start Referring',
     image:
-      'https://images.unsplash.com/photo-1769072610024-5b8a50f05c73?q=80&w=464&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      '/images/referral/slide-3.jpg',
   },
 ];
 

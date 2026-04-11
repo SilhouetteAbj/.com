@@ -72,7 +72,7 @@ export const chatService = {
         .order('updatedAt', { ascending: false });
 
       if (error) throw error;
-      return { success: true, data: data || [] };
+      return { success: true, data: (data || []) as unknown as ChatThread[] };
     } catch (error) {
       console.error('Failed to fetch chat threads:', error);
       return { success: false, error: 'Failed to fetch chat threads' };
@@ -93,7 +93,7 @@ export const chatService = {
         .single();
 
       if (error) throw error;
-      return { success: true, data };
+      return { success: true, data: data as unknown as ChatThread };
     } catch (error) {
       console.error('Failed to fetch chat thread:', error);
       return { success: false, error: 'Failed to fetch chat thread' };

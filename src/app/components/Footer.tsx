@@ -4,7 +4,7 @@ import { Phone, Mail, MapPin, Clock, Facebook, Twitter, Instagram, Linkedin, You
 import { SERVICE_CATEGORIES } from '@/app/data/servicesData';
 import { trackContactClick } from '@/app/lib/analyticsStore';
 
-const LOGO_URL = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgsnOwbpMeE0JQrY76UgyB7dmoD6z3P8_WrA&s';
+const LOGO_URL = '/brand/silhouette-logo-source.png';
 
 const services = SERVICE_CATEGORIES.map((c) => ({
   label: c.title,
@@ -117,11 +117,11 @@ export function Footer() {
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-cyan-400 shrink-0" />
                 <a
-                  href="tel:+2348101196774"
+                  href="tel:+2349071920849"
                   onClick={() => trackContactClick('call')}
                   className="text-blue-200 text-sm hover:text-cyan-400 transition-colors"
                 >
-                  +2348101196774
+                  +2349071920849
                 </a>
               </div>
               <div className="flex items-center gap-3">

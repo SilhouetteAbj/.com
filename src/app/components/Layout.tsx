@@ -1,74 +1,21 @@
 import { Outlet, useLocation } from 'react-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { useLenisScroll } from '@/hooks/useLenisScroll';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { BottomNav } from '@/components/BottomNav';
 import { FloatingActions } from './FloatingActions';
 import { trackDailyVisitor, trackPageView } from '@/app/lib/analyticsStore';
-import { supabase } from '@/app/lib/supabaseClient';
 
 export function Layout() {
   const { pathname } = useLocation();
   useLenisScroll();
-  const releaseRef = useRef<string | null>(null);
-  const releaseInitRef = useRef(false);
-  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     trackPageView(pathname);
     trackDailyVisitor();
   }, [pathname]);
-
-  useEffect(() => {
-    let active = true;
-    const loadRelease = async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('value')
-        .eq('key', 'release_version')
-        .maybeSingle();
-      if (!active) return;
-      if (data?.value) {
-        releaseRef.current = data.value;
-      }
-      releaseInitRef.current = true;
-    };
-    void loadRelease();
-    const channel = supabase
-      .channel('site-settings')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'site_settings', filter: 'key=eq.release_version' },
-        (payload) => {
-          const nextValue = (payload.new as { value?: string } | null)?.value;
-          if (!nextValue) return;
-          if (!releaseInitRef.current) {
-            releaseRef.current = nextValue;
-            releaseInitRef.current = true;
-            return;
-          }
-          if (releaseRef.current && nextValue !== releaseRef.current) {
-            releaseRef.current = nextValue;
-            setShowUpdateBanner(true);
-            if (navigator.serviceWorker?.controller) {
-              navigator.serviceWorker.controller.postMessage({ type: 'FORCE_RELOAD' });
-            }
-            window.setTimeout(() => {
-              window.location.reload();
-            }, 2000);
-          } else if (!releaseRef.current) {
-            releaseRef.current = nextValue;
-          }
-        }
-      )
-      .subscribe();
-    return () => {
-      active = false;
-      supabase.removeChannel(channel);
-    };
-  }, []);
 
   const isAdmin = pathname === '/admin';
   const isReferral = pathname.startsWith('/doctor-referral') || pathname.startsWith('/doctors-referral');
@@ -77,11 +24,6 @@ export function Layout() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {showUpdateBanner && (
-        <div className="bg-blue-600 text-white text-sm px-4 py-2 text-center">
-          New update available. Refreshing your session...
-        </div>
-      )}
       {!hideChrome && <Navbar />}
       <main className={`flex-1 ${hideChrome ? '' : 'pb-24'}`}>
         <Outlet />

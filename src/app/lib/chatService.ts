@@ -25,6 +25,9 @@ export const ensureUser = async () => {
   if (data.user) return data.user;
   const { data: anonData, error } = await supabase.auth.signInAnonymously();
   if (error) throw error;
+  if (!anonData.user) {
+    throw new Error('Unable to initialize anonymous chat session.');
+  }
   return anonData.user;
 };
 

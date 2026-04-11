@@ -19,13 +19,13 @@ export const SERVICES = {
     label: 'Endoscopy',
     icon: 'Eye',
     color: 'from-emerald-500 to-teal-500',
-    imageUrl: 'https://drganesh.sg/wp-content/uploads/2022/02/shutterstock_719554555-min-1.jpg',
+    imageUrl: '/images/shared/endoscopy-service.jpg',
   },
   'colonoscopy': {
     label: 'Colonoscopy',
     icon: 'Scan',
     color: 'from-amber-500 to-orange-500',
-    imageUrl: 'https://cdn.medicalpark.com.tr/colonoscopy.jpg',
+    imageUrl: '/images/shared/colonoscopy-service.jpg',
   },
   'eeg': {
     label: 'EEG',

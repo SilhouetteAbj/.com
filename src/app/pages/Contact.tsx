@@ -44,7 +44,7 @@ export function Contact() {
           <div className="space-y-5">
             {[
               { icon: MapPin, title: 'Our Location', content: 'NO12 kudang street of monrovia street, wuse2 Abuja Nigeria', color: 'text-blue-600 bg-blue-50' },
-              { icon: Phone, title: 'Phone Numbers', content: '+2349030002653\n+2348101196774', color: 'text-cyan-600 bg-cyan-50' },
+              { icon: Phone, title: 'Phone Numbers', content: '+2349030002653\n+2349071920849', color: 'text-cyan-600 bg-cyan-50' },
               { icon: Mail, title: 'Email Address', content: 'silhouetteradiodiagnostics@gmail.com', color: 'text-indigo-600 bg-indigo-50' },
               { icon: Clock, title: 'Business Hours', content: '24 Hours - Monday to Sunday', color: 'text-emerald-600 bg-emerald-50' },
             ].map((item) => (
@@ -68,7 +68,7 @@ export function Contact() {
             {/* Abuja Branch Image */}
             <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 min-w-0">
               <img
-                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTg1o4tEVjZivOS7MqK5w8PAlQMe7LPVqjmxQ&s"
+                src="/images/pages/contact-branch.jpg"
                 alt="Silhouette Diagnostics Abuja Branch"
                 className="w-full h-52 object-cover"
                 loading="lazy"

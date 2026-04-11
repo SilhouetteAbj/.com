@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Phone, MessageCircle, CheckCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { trackContactClick, trackReferralRegistration } from '@/app/lib/analyticsStore';
-import { supabase } from '@/app/lib/supabaseClient';
+import { submitReferralPartner } from '@/app/lib/publicApi';
 
 export function DoctorReferralDashboard() {
   useMetaTags({
@@ -22,16 +22,12 @@ export function DoctorReferralDashboard() {
     phone: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState('');
 
   const saveReferralPartner = async (payload: { fullName: string; placeOfWork: string; phone: string }) => {
-    await supabase.from('referral_partners').insert({
-      full_name: payload.fullName,
-      place_of_work: payload.placeOfWork,
-      phone: payload.phone,
-      status: 'pending',
-      referrals_count: 0,
-    });
+    await submitReferralPartner(payload);
   };
 
   const validate = () => {
@@ -48,13 +44,21 @@ export function DoctorReferralDashboard() {
     const v = validate();
     setErrors(v);
     if (Object.keys(v).length > 0) return;
-    await saveReferralPartner({
-      fullName: form.fullName.trim(),
-      placeOfWork: form.placeOfWork.trim(),
-      phone: form.phone.trim(),
-    });
-    trackReferralRegistration();
-    setSubmitted(true);
+    setSubmitError('');
+    setLoading(true);
+    try {
+      await saveReferralPartner({
+        fullName: form.fullName.trim(),
+        placeOfWork: form.placeOfWork.trim(),
+        phone: form.phone.trim(),
+      });
+      trackReferralRegistration();
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to submit your referral registration right now.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const whatsappMessage = encodeURIComponent(
@@ -80,6 +84,11 @@ export function DoctorReferralDashboard() {
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
+                {submitError && (
+                  <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+                    {submitError}
+                  </div>
+                )}
                 <div>
                   <label className="text-sm text-white/70">Full Name</label>
                   <input
@@ -112,9 +121,10 @@ export function DoctorReferralDashboard() {
                 </div>
                 <button
                   type="submit"
+                  disabled={loading}
                   className="w-full py-3.5 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors"
                 >
-                  Submit
+                  {loading ? 'Submitting...' : 'Submit'}
                 </button>
               </form>
             </>
